@@ -55,7 +55,7 @@ export class Target implements ContentSource, PageLinkResolver, ImageRequestHand
 
     info: RunnerInfo = {
         id: 'AsuraScans',
-        version: 2.12,
+        version: 2.13,
         name: 'AsuraScans',
         thumbnail: 'AsuraScans.png',
         rating: CatalogRating.MIXED,
@@ -203,7 +203,7 @@ export class Target implements ContentSource, PageLinkResolver, ImageRequestHand
 
         const url: string = await this.getBaseUrl()
         const data = await loadRequestData(this.client, `${url}/${chapterLink}/`)
-        return this.parser.parseChapterDetails(data)
+        return this.parser.parseChapterDetails(data, mangaId)
     }
 
     async getFilters(): Promise<DirectoryFilter[]> {

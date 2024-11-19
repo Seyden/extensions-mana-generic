@@ -156,16 +156,28 @@ export class AsuraScansParser{
         return chapters
     }
 
-    parseChapterDetails(data: string): ChapterData {
-        const pages: ChapterPage[] = []
-
+    parseChapterDetails(data: string, mangaId: string): ChapterData {
         const $ = load(data, { _useHtmlParser2: true })
 
-        for (const img of $('img', 'div.py-8.-mx-5').toArray()) {
-            const image = $(img).attr('src') ?? ''
-            if (!image) continue
-            pages.push({ url: image.trim() })
+        let scriptContent = $('script:contains("self.__next_f.push")').toArray().map(x => {
+            let content = $(x).html() ?? ''
+            return content.substring(content.indexOf('"') + 1, content.lastIndexOf('"'))
+        }).join('')
+        scriptContent = scriptContent.replace(/\\"/gm, '"') ?? ''
+        const match = scriptContent.match(/"pages":(\[.*?])/m)
+
+        const pagesObj = match?.[1]
+        if (!pagesObj) {
+            throw new Error(`Failed to parse chapter pages for manga ${mangaId}`)
         }
+
+        const pages: ChapterPage[] = JSON.parse(pagesObj)
+                                         .map((page: any) => ({
+                                             url: page.url,
+                                             order: page.order
+                                         }))
+                                         .sort((x: any) => x.order)
+                                         .map((x: ChapterPage) => ({ url: x.url }))
 
         return {
             pages: pages

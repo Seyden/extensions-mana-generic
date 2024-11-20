@@ -14,42 +14,44 @@ import {
 } from '@suwatte/daisuke'
 
 import {
-    extractMangaData,
     HomeSectionData,
     setMangaSlug
 } from './AsuraScansHelper'
 
 import { decode as decodeHTMLEntity } from 'html-entities'
+import { NextJSParser } from './NextJSParser'
 import { load } from 'cheerio'
 
 export class AsuraScansParser{
     async parseMangaDetails(data: string, mangaId: string, source: any): Promise<Content> {
-        const tempData = data.replace(/\\"/g, '"').replace(/\\\\"/g, '\\"')
-        const obj = extractMangaData(tempData, "comic") ?? ''
-        if (obj == '') {
-            throw new Error(`Failed to parse comic object for manga ${mangaId}`) // If null, throw error, else parse data to json.
+        const $ = load(data, { _useHtmlParser2: true })
+        const nextJSParser = new NextJSParser($, ["chapters"])
+
+        const comicKey = nextJSParser.getReferenceKeyForProperty('comic')
+        if (!comicKey) {
+            throw new Error(`Failed to retrieve the comic key for manga ${mangaId}`)
         }
 
-        const $ = load(data, { _useHtmlParser2: true })
+        const comic = nextJSParser.getObjectByKey(comicKey)
 
-        const comicObj = JSON.parse(obj)
+        const title = comic.name.trim()
+        const author = comic.author?.trim()
+        const artist = comic.artist?.trim()
 
-        const title = decodeHTMLEntity($('span.text-xl,font-bold').text().trim())
-        const author = $('h3:contains(Author)').next().text().trim()
-        const artist = $('h3:contains(Artist)').next().text().trim()
+        const image = comic.thumb
+        const covers = [comic.cover]
+        let description = comic.summary.trim()
+        if (description != '') {
+            description = decodeHTMLEntity(load(description).root().text().replace(/\\r\\n/gm, '\n'))
+        }
 
-        const image = this.getImageSrc($('img.rounded,mx-auto'))
-        const covers = [image]
-        const description = decodeHTMLEntity($('span.font-medium').text().trim().replace(/\\r\\n/gm, '\n'))
-
-        let url = $('meta[property="og:url"]').attr("content")?.trim() ?? ''
-        let slug = url.split(`${source.sourceTraversalPathName}/`)[1] ?? ''
+        let slug = comic.slug?.trim()
         if (slug)  {
             slug = `${source.sourceTraversalPathName}/${slug}`
             await setMangaSlug(mangaId, slug)
         }
 
-        const rawStatus = $('h3:contains(Status)').next().text().trim()
+        const rawStatus = comic.status?.name?.trim() ?? ''
         let status
         switch (rawStatus.toLowerCase()) {
             case source.manga_StatusTypes.DROPPED.toLowerCase():
@@ -79,7 +81,7 @@ export class AsuraScansParser{
             {
                 id: "genres",
                 title: "Genres",
-                tags: comicObj.comic.genres.map((genre: any) => ({
+                tags: comic.genres.map((genre: any) => ({
                     id: genre.id.toString(),
                     title: genre.name
                 }))
@@ -102,7 +104,7 @@ export class AsuraScansParser{
             }] : []
         ]
 
-        const chapters = await this.parseChapterList($, mangaId, source, slug)
+        const chapters = await this.parseChapterList(nextJSParser, mangaId, source, slug)
 
         return {
             title: title,
@@ -116,39 +118,31 @@ export class AsuraScansParser{
         }
     }
 
-    async parseChapterList($: CheerioStatic, mangaId: string, source: any, mangaSlug: string): Promise<Chapter[]> {
+    async parseChapterList(nextJSParser: NextJSParser, mangaId: string, source: any, mangaSlug: string): Promise<Chapter[]> {
+        const chapterKey = nextJSParser.getKeyForProperty('chapters')
+        if (!chapterKey) {
+            throw new Error(`Failed to retrieve the chapter key for manga ${mangaId}`)
+        }
+
         const chapters: Chapter[] = []
         let sortingIndex = 0
 
-        const chapterArray = $('div.scrollbar-thumb-themecolor > div.group').toArray()
-        for (const chapter of chapterArray) {
-            const anchor = $('a', chapter)
-            const link = anchor.attr('href') ?? ''
-
-            const chapNumRegex = link.match(/(?:chapter|ch?)\/(\d+\.?\d?(?:[-_]\d+)?)|(\d+\.?\d?(?:[-_]\d+)?)$/)
-            let chapNum: string | number | null = chapNumRegex && chapNumRegex[1] ? chapNumRegex[1].replace(/[-_]/gm, '.') : null
-            if (!chapNum) {
-                throw new Error(`Could not parse out chapter number when getting chapters for: ${mangaId}`)
-            }
-
-            // make sure the chapter number is a number and not NaN
-            chapNum = parseFloat(chapNum)
-            if (isNaN(chapNum)) {
-                throw new Error(`Could not parse a valid number for chapter ${link}`)
-            }
-
-            const title = $('span.pl-1', anchor).first().text().trim() ?? ''
-            const publishedDate = $('h3.text-xs', chapter).text().trim().replace(/(\d)(st|nd|rd|th)/, '$1')
+        const rawChapters = nextJSParser.getObjectByKey(chapterKey)
+        for (const chapter of rawChapters[3].chapters.reverse()) {
+            const title = chapter.title
+            const name = chapter.name
+            const publishedDate = chapter.published_at
+            const link = `${mangaSlug}/chapter/${name}`
 
             chapters.push({
-                chapterId: chapNum.toString(),
+                chapterId: name.toString(),
                 language: source.language,
-                number: chapNum,
-                title: !title ? `Chapter ${chapNum}` : title,
+                number: name,
+                title: !title ? `Chapter ${name}` : title,
                 date: new Date(publishedDate),
                 index: sortingIndex,
                 volume: 0,
-                webUrl: `${source.sourceTraversalPathName}/${link}`
+                webUrl: link
             })
             sortingIndex++
         }

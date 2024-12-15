@@ -53,11 +53,9 @@ const ASURASCANS_API_DOMAIN = 'https://gg.asuracomic.net'
 
 export class Target implements ContentSource, PageLinkResolver, ImageRequestHandler, DirectoryHandler, RunnerPreferenceProvider {
 
-    // dsk use webkit
-
     info: RunnerInfo = {
         id: 'AsuraScans',
-        version: 2.15,
+        version: 2.16,
         name: 'AsuraScans',
         thumbnail: 'AsuraScans.png',
         rating: CatalogRating.MIXED,

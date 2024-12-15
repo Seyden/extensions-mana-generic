@@ -129,6 +129,9 @@ export class AsuraScansParser{
 
         const rawChapters = nextJSParser.getObjectByKey(chapterKey)
         for (const chapter of rawChapters[3].chapters.reverse()) {
+            if (chapter.is_early_access) {
+                continue
+            }
             const title = chapter.title
             const name = chapter.name
             const publishedDate = chapter.published_at

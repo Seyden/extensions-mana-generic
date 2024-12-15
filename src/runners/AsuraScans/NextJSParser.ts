@@ -1,4 +1,7 @@
-﻿export class NextJSParser {
+﻿// @ts-ignore
+import { TextEncoder, TextDecoder } from '@sinonjs/text-encoding'
+
+export class NextJSParser {
     public rawContent: string
     private propertyToKeyCache: Map<string, string | null> | undefined
 

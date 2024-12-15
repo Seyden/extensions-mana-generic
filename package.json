@@ -35,10 +35,11 @@
     "simple-url": "^1.1.8"
   },
   "dependencies": {
-    "@seyden/cli": "^2.0.8",
+    "@seyden/cli": "^2.0.9",
     "@suwatte/daisuke": "^3.0.7",
     "@suwatte/emulator": "^1.3.1",
     "@suwatte/validate": "^3.0.0",
+    "@sinonjs/text-encoding": "^0.7.3",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.1.1",
     "html-entities": "^2.5.2",

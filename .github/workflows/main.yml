@@ -25,7 +25,8 @@ jobs:
         id: extract_branch
 
       - run: npm install
-      - run: npm run build -- --folder ${{ steps.extract_branch.outputs.branch }}
+      - run: npm install -D @mana-app/dev@latest
+      - run: npx mana-dev build --output ${{ steps.extract_branch.outputs.branch }}
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.0

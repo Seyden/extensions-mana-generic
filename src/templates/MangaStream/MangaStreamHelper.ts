@@ -2,7 +2,7 @@ import {
     PageSection,
     SectionStyle,
     Tag
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 export interface HomeSectionData {
     selectorFunc: Function
@@ -21,7 +21,7 @@ export const DefaultHomeSectionData = {
     enabled: true
 }
 
-export function createHomeSection(id: string, title: string, containsMoreItems: boolean = true, style: SectionStyle = SectionStyle.DEFAULT): PageSection {
+export function createHomeSection(id: string, title: string, containsMoreItems: boolean = true, style: SectionStyle = SectionStyle.SimpleSingleRow): PageSection {
     return {
         id,
         title,

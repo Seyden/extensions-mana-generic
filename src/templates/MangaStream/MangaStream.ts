@@ -6,7 +6,7 @@ import {
     ContentSource,
     DirectoryConfig,
     DirectoryFilter,
-    DirectoryRequest,
+    SearchRequest,
     ExcludableMultiSelectProp,
     Form,
     Highlight,
@@ -14,15 +14,15 @@ import {
     NetworkClientBuilder,
     NetworkRequest,
     NetworkResponse,
-    PagedResult,
+    PagedSearchResult,
     PageLink,
     PageLinkResolver,
     PageSection,
     Property,
     ResolvedPageSection,
-    RunnerInfo,
+    SourceInfo,
     SectionStyle,
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 import { MangaStreamParser } from './MangaStreamParser'
 import { URLBuilder } from './UrlBuilder'
@@ -41,14 +41,14 @@ import {
 } from './MangaStreamInterfaces'
 
 import { load } from 'cheerio'
-import { UITextField } from '@suwatte/daisuke/dist/types/UI/UIElementBuilders'
+import { UITextField } from '@mana-app/types/dist/types/UI/UIElementBuilders'
 
 const simpleUrl = require('simple-url')
 
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = 1.05
-export const getExportVersion = (EXTENSION_VERSION: any): number => {
-    return Number(BASE_VERSION + Number(EXTENSION_VERSION))
+const BASE_VERSION = "1.0.0"
+export const getExportVersion = (EXTENSION_VERSION: string): string => {
+    return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.')
 }
 
 export abstract class MangaStream implements ContentSource, PageLinkResolver, ImageRequestHandler {
@@ -56,7 +56,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         this.configureSections()
     }
 
-    abstract info: RunnerInfo
+    abstract info: SourceInfo
 
     async getPreferenceMenu(): Promise<Form> {
         return {
@@ -247,7 +247,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
     sections: Record<'popular_today' | 'latest_update' | 'new_titles' | 'top_alltime' | 'top_monthly' | 'top_weekly', HomeSectionData> = {
         'popular_today': {
             ...DefaultHomeSectionData,
-            section: createHomeSection('popular_today', 'Popular Today', true, SectionStyle.GALLERY),
+            section: createHomeSection('popular_today', 'Popular Today', true, SectionStyle.SimpleHeroPaged),
             selectorFunc: ($: CheerioStatic) => $('div.bsx', $('h2:contains(Popular Today)')?.parent()?.next()),
             titleSelectorFunc: ($: CheerioStatic, element: CheerioElement) => $('a', element).attr('title'),
             subtitleSelectorFunc: ($: CheerioStatic, element: CheerioElement) => $('div.epxs', element).text().trim(),
@@ -356,7 +356,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         ]
     }
 
-    async getDirectory(searchRequest: DirectoryRequest<FilterProps>): Promise<PagedResult> {
+    async getDirectory(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         if (searchRequest.listId) {
             return this.getViewMoreItems(searchRequest)
         }
@@ -391,7 +391,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         }
     }
 
-    private async search(query: DirectoryRequest<FilterProps>): Promise<{isLastPage: boolean, manga: Highlight[]}> {
+    private async search(query: SearchRequest<FilterProps>): Promise<{isLastPage: boolean, manga: Highlight[]}> {
         const page: number = query?.page ?? 1
 
         const request = await this.constructSearchRequest(page, query)
@@ -431,7 +431,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         }
     }
 
-    async constructSearchRequest(page: number, query: DirectoryRequest<FilterProps>): Promise<any> {
+    async constructSearchRequest(page: number, query: SearchRequest<FilterProps>): Promise<any> {
         const url: string = await this.getAndSetBaseUrl()
         let urlBuilder: URLBuilder = new URLBuilder(url)
             .addPathComponent(this.sourceTraversalPathName)
@@ -488,7 +488,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
             .map(x => x.value)
     }
 
-    async getViewMoreItems(searchRequest: DirectoryRequest): Promise<PagedResult> {
+    async getViewMoreItems(searchRequest: SearchRequest): Promise<PagedSearchResult> {
         const page: number = searchRequest?.page ?? 1
 
         // @ts-ignore

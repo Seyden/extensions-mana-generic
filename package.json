@@ -1,15 +1,15 @@
 {
-  "name": "extensions-suwatte-generic-6.0",
-  "version": "6.0.0",
-  "repositoryName": "Suwatte - Generic (6.0)",
-  "description": "Suwatte - Generic for 6.0!",
+  "name": "extensions-Mana-generic-1.0",
+  "version": "1.0.0",
+  "repositoryName": "Mana - Generic (1.0)",
+  "description": "Mana - Generic for 1.0!",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "prep": "rm -rf ./dist && tsc",
     "dev": "nodemon",
-    "build": "daisuke build",
-    "serve": "daisuke serve",
+    "build": "mana build",
+    "serve": "mana serve",
     "lint": "eslint"
   },
   "author": {
@@ -35,17 +35,17 @@
     "simple-url": "^1.1.8"
   },
   "dependencies": {
-    "@seyden/cli": "^2.0.9",
-    "@suwatte/daisuke": "^3.0.7",
-    "@suwatte/emulator": "^1.3.1",
-    "@suwatte/validate": "^3.0.0",
+    "@mana-app/types": "^0.0.20",
     "@sinonjs/text-encoding": "^0.7.3",
+    "@types/cheerio": "^0.22.21",
     "cheerio": "^1.0.0-rc.12",
     "crypto-js": "^4.1.1",
     "html-entities": "^2.5.2",
     "moment": "^2.30.1"
   },
-  "stt": {
-    "listName": "Seyden | Suwatte - Generic (6.0)"
-  }
+  "mana": {
+    "repositoryName": "Seyden | Mana - Generic (1.0)",
+    "thumbnail": "https://avatars.githubusercontent.com/u/639817"
+  },
+  "type": "module"
 }

@@ -13,7 +13,7 @@ import {
     Property,
     PublicationStatus,
     Tag
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 export class MangaStreamParser {
     async parseMangaDetails($: CheerioStatic, mangaId: string, source: any): Promise<Content> {

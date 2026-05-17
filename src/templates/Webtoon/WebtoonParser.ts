@@ -3,11 +3,11 @@
     ChapterData,
     Content,
     Highlight,
-    PagedResult,
+    PagedSearchResult,
     Property,
     PublicationStatus,
     Tag
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 import moment from 'moment/min/moment-with-locales'
 
@@ -202,7 +202,7 @@ export class WebtoonParser {
         }
     }
 
-    parseSearchResults($: CheerioSelector, canvas_wanted: boolean): PagedResult {
+    parseSearchResults($: CheerioSelector, canvas_wanted: boolean): PagedSearchResult {
         const items: Highlight[] = []
         const test = $('#content > div.card_wrap.search li a.card_item')
             .toArray()
@@ -242,7 +242,7 @@ export class WebtoonParser {
         }
     }
 
-    parseTagResults($: CheerioSelector): PagedResult {
+    parseTagResults($: CheerioSelector): PagedSearchResult {
         let items = $('#content > div.card_wrap ul.card_lst li a')
             .toArray()
             .map(elem => this.parseMangaFromElement($(elem)))

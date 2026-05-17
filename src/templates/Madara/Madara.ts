@@ -3,9 +3,8 @@ import {
     ChapterData,
     Content,
     ContentSource,
-    DirectoryConfig,
-    DirectoryFilter,
-    DirectoryRequest,
+    SearchFilter,
+    SearchRequest,
     FilterType,
     Form,
     Highlight,
@@ -13,30 +12,29 @@ import {
     NetworkClientBuilder,
     NetworkRequest,
     NetworkResponse,
-    PagedResult,
+    PagedSearchResult,
     PageLink,
     PageLinkResolver,
     PageSection,
-    Property,
     ResolvedPageSection,
-    RunnerInfo,
+    SourceInfo,
     SectionStyle,
     Tag,
     UIToggle
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 import { Parser } from './MadaraParser'
 import { URLBuilder } from './MadaraHelper'
 import { load } from 'cheerio'
 
-const BASE_VERSION = 1.04
-export const getExportVersion = (EXTENSION_VERSION: any): number => {
-    return Number(BASE_VERSION + Number(EXTENSION_VERSION))
+const BASE_VERSION = "1.0.0"
+export const getExportVersion = (EXTENSION_VERSION: string): string => {
+    return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.')
 }
 
 export abstract class Madara implements ContentSource, PageLinkResolver, ImageRequestHandler {
 
-    abstract info: RunnerInfo
+    abstract info: SourceInfo
 
     /**
      *  Request manager override
@@ -256,8 +254,8 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         return this.parser.parseChapterDetails($, mangaId, chapterId, this.chapterDetailsSelector, this)
     }
 
-    async getFilters(): Promise<DirectoryFilter[]> {
-        const genres: DirectoryFilter = {
+    async getSearchFilters(): Promise<SearchFilter[]> {
+        const genres: SearchFilter = {
             id: "genres",
             title: "Genres",
             type: FilterType.MULTISELECT,
@@ -275,17 +273,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         return this.parser.parseTags($, this.hasAdvancedSearchPage)
     }
 
-    async getTags(): Promise<Property[]> {
-        return [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: await this.getGenreTags()
-            }
-        ]
-    }
-
-    async getDirectory(searchRequest: DirectoryRequest): Promise<PagedResult> {
+    async search(searchRequest: SearchRequest): Promise<PagedSearchResult> {
         if (searchRequest.listId) {
             return this.getViewMoreItems(searchRequest)
         }
@@ -326,15 +314,36 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         }
     }
 
-    async getDirectoryConfig(configID?: string | undefined): Promise<DirectoryConfig> {
-        return {
-            filters: await this.getFilters()
-        }
-    }
-
     async getSectionsForPage(link: PageLink): Promise<PageSection[]> {
         if (link.id !== "home")
             throw new Error("Accessing invalid page")
+
+        return [
+            {
+                id: '0',
+                title: 'Recently Updated',
+                style: SectionStyle.SimpleSingleRow,
+                viewMoreLink: { request: { page: 1, listId: "0" } }
+            },
+            {
+                id: '1',
+                title: 'Currently Trending',
+                style: SectionStyle.SimpleSingleRow,
+                viewMoreLink: { request: { page: 1, listId: "1" } }
+            },
+            {
+                id: '2',
+                title: 'Most Popular',
+                style: SectionStyle.SimpleSingleRow,
+                viewMoreLink: { request: { page: 1, listId: "2" } }
+            },
+            {
+                id: '3',
+                title: 'Completed',
+                style: SectionStyle.SimpleSingleRow,
+                viewMoreLink: { request: { page: 1, listId: "3" } }
+            }
+        ]
 
         const sections: { request: any, section: PageSection }[] = [
             {
@@ -342,7 +351,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 section: {
                     id: '0',
                     title: 'Recently Updated',
-                    style: SectionStyle.DEFAULT,
+                    style: SectionStyle.SimpleSingleRow,
                     viewMoreLink: { request: { page: 1, listId: "0" } }
                 }
             },
@@ -351,7 +360,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 section: {
                     id: '1',
                     title: 'Currently Trending',
-                    style: SectionStyle.DEFAULT,
+                    style: SectionStyle.SimpleSingleRow,
                     viewMoreLink: { request: { page: 1, listId: "1" } }
                 }
             },
@@ -360,7 +369,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 section: {
                     id: '2',
                     title: 'Most Popular',
-                    style: SectionStyle.DEFAULT,
+                    style: SectionStyle.SimpleSingleRow,
                     viewMoreLink: { request: { page: 1, listId: "2" } }
                 }
             },
@@ -369,7 +378,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 section: {
                     id: '3',
                     title: 'Completed',
-                    style: SectionStyle.DEFAULT,
+                    style: SectionStyle.SimpleSingleRow,
                     viewMoreLink: { request: { page: 1, listId: "3" } }
                 }
             }
@@ -400,11 +409,49 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             .map(x => x.value)
     }
 
-    resolvePageSection(link: PageLink, sectionID: string): Promise<ResolvedPageSection> {
-        throw new Error('Method not needed.')
+    async resolvePageSection(link: PageLink, sectionID: string): Promise<ResolvedPageSection> {
+        switch (sectionID) {
+            case '0': {
+                var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_latest_update'))
+                this.checkResponseError(response)
+                const $ = load(response.data as string)
+                const items: Highlight[] = await this.parser.parseHomeSection($, this)
+                return {
+                    items: items,
+                }
+            }
+            case '1': {
+                var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_week_views_value'))
+                this.checkResponseError(response)
+                const $ = load(response.data as string)
+                const items: Highlight[] = await this.parser.parseHomeSection($, this)
+                return {
+                    items: items,
+                }
+            }
+            case '2': {
+                var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_views'))
+                this.checkResponseError(response)
+                const $ = load(response.data as string)
+                const items: Highlight[] = await this.parser.parseHomeSection($, this)
+                return {
+                    items: items,
+                }
+            }
+            case '3': {
+                var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_status', 'end'))
+                this.checkResponseError(response)
+                const $ = load(response.data as string)
+                const items: Highlight[] = await this.parser.parseHomeSection($, this)
+                return {
+                    items: items,
+                }
+            }
+        }
+        throw new Error('Invalid section ID!')
     }
 
-    async getViewMoreItems(searchRequest: DirectoryRequest): Promise<PagedResult> {
+    async getViewMoreItems(searchRequest: SearchRequest): Promise<PagedSearchResult> {
         const page = searchRequest?.page ?? 0
         let sortBy: any[] = []
 
@@ -441,9 +488,8 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     }
 
     // Utility
-    constructSearchRequest(page: number, request: DirectoryRequest): any {
+    constructSearchRequest(page: number, request: SearchRequest): any {
         const genres = request.filters?.genres ?? [];
-        genres.push(request.tag?.tagId)
 
         return {
             url: new URLBuilder(this.baseUrl)
@@ -458,7 +504,8 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     }
 
     constructAjaxHomepageRequest(page: number, postsPerPage: number, meta_key: string, meta_value?: string): any {
-        return {
+        console.log(`constructAjaxHomepageRequest`)
+        const request: NetworkRequest = {
             url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
             method: 'POST',
             headers: {
@@ -476,8 +523,10 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 'vars[order]': 'desc',
                 'vars[meta_key]': meta_key,
                 'vars[meta_value]': meta_value
-            }
+            },
+            validateStatus: s => s == 404 || s == 403 || s == 503 || (s >= 200 && s < 300)
         }
+        return request
     }
 
     async slugToPostId(slug: string, path: string): Promise<string> {
@@ -582,6 +631,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
 
     checkResponseError(response: NetworkResponse): void {
         const status = response.status
+        console.log(`checkResponseError: ${status}`)
         switch (status) {
             case 403:
             case 503:

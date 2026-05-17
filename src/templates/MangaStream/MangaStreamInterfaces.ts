@@ -1,4 +1,4 @@
-import { ExcludableMultiSelectProp } from '@suwatte/daisuke'
+import { ExcludableMultiSelectProp } from '@mana-app/types'
 
 export interface Months {
     january: string;

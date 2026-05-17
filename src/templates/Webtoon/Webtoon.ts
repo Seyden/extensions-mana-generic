@@ -8,19 +8,19 @@ import {
     DirectoryConfig,
     DirectoryFilter,
     DirectoryHandler,
-    DirectoryRequest,
+    SearchRequest,
     Form,
     Highlight,
     ImageRequestHandler,
     NetworkClientBuilder,
     NetworkRequest,
-    PagedResult,
+    PagedSearchResult,
     PageLink,
     PageLinkResolver,
     PageSection,
     Property,
     ResolvedPageSection,
-    RunnerInfo,
+    SourceInfo,
     SectionStyle,
     RunnerPreferenceProvider,
     NetworkResponse,
@@ -30,7 +30,7 @@ import {
     Tag,
     Cookie,
     CatalogRating
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 import { WebtoonParser } from './WebtoonParser'
 
@@ -41,7 +41,7 @@ export const BASE_URL_XX = 'https://www.webtoons.com'
 export const MOBILE_URL_XX = 'https://m.webtoons.com'
 
 export const WebtoonBaseInfo = {
-    version: 1.0,
+    version: "1.0.0",
     thumbnail: 'Webtoon.png',
     rating: CatalogRating.SAFE,
 }
@@ -50,7 +50,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
 
     // dsk use webkit
 
-    abstract info: RunnerInfo
+    abstract info: SourceInfo
 
     private cookies: Cookie[] = []
     private parser: WebtoonParser
@@ -193,7 +193,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
             this.parser.parseCanvasRecommendedTitles)
     }
 
-    getCanvasPopularTitles(request?: DirectoryRequest<FilterProps>, genre?: string): Promise<Highlight[]> {
+    getCanvasPopularTitles(request?: SearchRequest<FilterProps>, genre?: string): Promise<Highlight[]> {
         return this.ExecRequest(
             {
                 url: `${this.BASE_URL}/canvas/list`,
@@ -242,7 +242,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
         ]
     }
 
-    async getDirectory(searchRequest: DirectoryRequest<FilterProps>): Promise<PagedResult> {
+    async getDirectory(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         if (searchRequest.listId) {
             return this.getViewMoreItems(searchRequest)
         }
@@ -314,7 +314,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                     section: {
                         id: 'popular',
                         title: 'New & Trending',
-                        style: SectionStyle.DEFAULT
+                        style: SectionStyle.SimpleSingleRow
                     }
                 })
 
@@ -325,7 +325,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                     id: 'today',
                     title: 'Today release',
                     viewMoreLink: { request: { page: 0, listId: "today" } },
-                    style: SectionStyle.DEFAULT
+                    style: SectionStyle.SimpleSingleRow
                 }
             },
             {
@@ -334,7 +334,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                     id: 'ongoing',
                     title: 'Ongoing',
                     viewMoreLink: { request: { page: 0, listId: "ongoing" } },
-                    style: SectionStyle.DEFAULT
+                    style: SectionStyle.SimpleSingleRow
                 }
             },
             {
@@ -343,7 +343,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                     id: 'completed',
                     title: 'Completed',
                     viewMoreLink: { request: { page: 0, listId: "completed" } },
-                    style: SectionStyle.DEFAULT
+                    style: SectionStyle.SimpleSingleRow
                 }
             }
         ])
@@ -357,7 +357,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                         section: {
                             id: 'canvas_recommended',
                             title: 'Canvas Recommended',
-                            style: SectionStyle.DEFAULT
+                            style: SectionStyle.SimpleSingleRow
                         }
                     },
                     {
@@ -366,7 +366,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
                             id: 'canvas_popular',
                             title: 'Canvas Popular',
                             viewMoreLink: { request: { page: 0, listId: "canvas_popular" } },
-                            style: SectionStyle.DEFAULT
+                            style: SectionStyle.SimpleSingleRow
                         }
 
                     }
@@ -388,7 +388,7 @@ export abstract class Webtoon implements ContentSource, PageLinkResolver, ImageR
         return await Promise.all(promises)
     }
 
-    async getViewMoreItems(request: DirectoryRequest<FilterProps>): Promise<PagedResult> {
+    async getViewMoreItems(request: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         let items: Highlight[] = []
 
         switch (request.listId) {

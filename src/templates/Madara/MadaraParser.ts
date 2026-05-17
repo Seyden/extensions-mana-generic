@@ -2,17 +2,20 @@ import {
     Chapter,
     ChapterData,
     Content,
+    ContentType,
     Highlight,
-    Property,
     PublicationStatus,
+    ReadingMode,
+    staff,
+    StaffSection,
     Tag
-} from '@suwatte/daisuke'
+} from '@mana-app/types'
 
 import {
     decryptData,
     extractVariableValues
 } from './MadaraDecrypter'
-import { ChapterPage } from '@suwatte/daisuke/dist/types/content/ChapterData'
+import { ChapterPage } from '@mana-app/types/dist/types/content/ChapterData'
 import { decode as decodeHTMLEntity } from 'html-entities'
 
 export class Parser {
@@ -46,28 +49,26 @@ export class Parser {
             genres.push({ title: label, id: id })
         }
 
-        const properties: Property[] = [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: genres
-            },
-            {
+        const additionalInfo: StaffSection[] | undefined = 
+            author || artist ? [staff.section({
                 id: "creators",
                 title: "Credits",
-                tags: [
-                    { title: author, id: `author-${author}`, noninteractive: true },
-                    { title: artist, id: `artist-${artist}`, noninteractive: true },
+                hasMore: false,
+                items: [
+                ...(author ? [staff.item({ id: author, title: author, subtitle: "Author" })] : []),
+                ...(artist ? [staff.item({ id: artist, title: artist, subtitle: "Artist" })] : []),
                 ],
-            },
-        ]
+            })] : undefined
 
         return {
             title,
             status,
-            properties,
+            tags: genres,
             summary: description,
-            cover: image
+            cover: image,
+            additionalInfo,
+            contentType: ContentType.MANHWA,
+            recommendedPanelMode: ReadingMode.WEBTOON
         }
     }
 

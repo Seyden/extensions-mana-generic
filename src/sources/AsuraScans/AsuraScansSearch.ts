@@ -1,11 +1,20 @@
-import { PagedSearchResult, SearchFilter, SearchRequest } from '@mana-app/types'
-import { FilterProps, GenresResponse, SeriesSearchResponse } from './AsuraScansInterfaces'
+import { PagedSearchResult, SearchFilter, SearchRequest, SortOption } from '@mana-app/types'
+import { FilterProps, GenresResponse, orderOptions, SeriesSearchResponse } from './AsuraScansInterfaces'
 import { getSelectValue, loadJsonData } from './AsuraScansHelper'
 import { ASURASCANS_API_DOMAIN } from './AsuraScansInfo'
 import { AsuraScansParser } from './AsuraScansParser'
 import { URLBuilder } from './UrlBuilder'
 
 const LIMIT = 20
+
+export async function getSortOptions(): Promise<SortOption[]> {
+    return orderOptions.map((option) => ({
+        id: option.value,
+        title: option.label,
+        isDefault: option.value === 'latest',
+        isOrderable: true
+    }))
+}
 
 export async function getSearchFilters(client: NetworkClient, parser: AsuraScansParser): Promise<SearchFilter[]> {
     const { data: genres } = await loadJsonData<GenresResponse>(client, `${ASURASCANS_API_DOMAIN}/api/genres`)

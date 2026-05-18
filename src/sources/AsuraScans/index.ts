@@ -11,6 +11,7 @@ import {
     PageSection,
     SearchFilter,
     SearchRequest,
+    SortOption,
     SourceInfo
 } from '@mana-app/types'
 import { HomeSectionData, loadCheerioData } from './AsuraScansHelper'
@@ -18,7 +19,7 @@ import { HOME_SECTIONS, SOURCE_INFO, STATUS_TYPES } from './AsuraScansInfo'
 import { FilterProps, StatusTypes } from './AsuraScansInterfaces'
 import { AsuraScansBase } from './AsuraScansBase'
 import { getContent, getChapters, getChapterData } from './AsuraScansContent'
-import { search, getSearchFilters, constructSearchUrl } from './AsuraScansSearch'
+import { search, getSearchFilters, constructSearchUrl, getSortOptions } from './AsuraScansSearch'
 
 export class Target extends AsuraScansBase implements ContentSource, PageLinkResolver {
 
@@ -30,6 +31,7 @@ export class Target extends AsuraScansBase implements ContentSource, PageLinkRes
     async getChapters(mangaId: string): Promise<Chapter[]> { return getChapters(this.client, this.parser, mangaId, this) }
     async getChapterData(mangaId: string, chapterId: string, chapter?: Chapter): Promise<ChapterData> { return getChapterData(this.client, this.parser, mangaId, chapterId, chapter) }
 
+    async getSortOptions(): Promise<SortOption[]> { return getSortOptions() }
     async getSearchFilters(): Promise<SearchFilter[]> { return getSearchFilters(this.client, this.parser) }
     async search(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> { return search(this.client, this.parser, searchRequest) }
     async constructSearchRequest(page: number, query: SearchRequest<FilterProps>): Promise<any> {

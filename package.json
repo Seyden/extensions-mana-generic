@@ -35,7 +35,7 @@
     "simple-url": "^1.1.8"
   },
   "dependencies": {
-    "@mana-app/types": "^0.0.20",
+    "@mana-app/types": "^0.0.21",
     "@sinonjs/text-encoding": "^0.7.3",
     "@types/cheerio": "^0.22.21",
     "cheerio": "^1.0.0-rc.12",

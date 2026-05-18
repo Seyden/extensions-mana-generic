@@ -14,7 +14,8 @@ import {
     Tag,
     staff,
     StaffSection,
-    ReadingMode
+    ReadingMode,
+    Pair
 } from '@mana-app/types'
 
 import {
@@ -248,13 +249,8 @@ export class AsuraScansParser{
         const isDetailed = section.section.style === SectionStyle.DetailedVerticalListGrouped
         const seen = new Map<string, Highlight>()
 
-        const subtitleFromEntry = (entry: [string, string]): string => {
-            const [chapterLine] = entry
-            return `${chapterLine}`
-        }
-
         for (const chapter of props.chapters ?? []) {
-            const entry: [string, string] = [`Chapter ${chapter.number}`, chapter.time_ago ?? '']
+            const entry: Pair = { key: `Chapter ${chapter.number}`, value: chapter.time_ago ?? '' }
             const existing = seen.get(chapter.comic_slug)
 
             if (!existing) {
@@ -265,10 +261,10 @@ export class AsuraScansParser{
                     webUrl: chapter.comic_public_url,
                     ...(isDetailed
                         ? { info: [entry] as any }
-                        : { subtitle: subtitleFromEntry(entry) })
+                        : { subtitle: entry.key })
                 })
             } else if (isDetailed) {
-                (existing.info as any as [string, string][]).push(entry)
+                (existing.info as any as [Pair]).push(entry)
             }
         }
 

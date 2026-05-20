@@ -4,8 +4,6 @@ import {
     ChapterData,
     Content,
     ContentSource,
-    DirectoryConfig,
-    DirectoryFilter,
     SearchRequest,
     ExcludableMultiSelectProp,
     Form,
@@ -18,10 +16,12 @@ import {
     PageLink,
     PageLinkResolver,
     PageSection,
-    Property,
     ResolvedPageSection,
     SourceInfo,
     SectionStyle,
+    SearchForm,
+    SearchTagsSection,
+    SearchMultiPicker,
 } from '@mana-app/types'
 
 import { MangaStreamParser } from './MangaStreamParser'
@@ -329,50 +329,40 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         return this.parser.parseChapterDetails($, mangaId, chapterId)
     }
 
-    async getFilters(): Promise<DirectoryFilter[]> {
+
+    async getSearchForm(): Promise<SearchForm> {
         const url: string = await this.getAndSetBaseUrl()
         const $ = await this.loadRequestData(`${url}/${this.sourceTraversalPathName}`)
+        let tags = this.parser.parseTags($, this.supportsTagExclusion).find(x => x.id == "genres")?.tags!
 
-        return this.parser.parseTags($, this.supportsTagExclusion).map(x => {
-            return {
-                id: x.id,
-                title: x.title,
-                type: x.type,
-                options: x.tags
-            }
-        })
+        return {
+            sections: [
+                SearchTagsSection({
+                    header: 'Genres',
+                    field: SearchMultiPicker({
+                        id: 'genres',
+                        title: 'Genres',
+                        options: tags
+                    })
+                })
+            ]
+        };
     }
 
-    async getTags(): Promise<Property[]> {
-        const url: string = await this.getAndSetBaseUrl()
-        const $ = await this.loadRequestData(`${url}/${this.sourceTraversalPathName}`)
-
-        return [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: this.parser.parseTags($, this.supportsTagExclusion).find(x => x.id == "genres")?.tags!
-            }
-        ]
-    }
-
-    async getDirectory(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
+    async search(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         if (searchRequest.listId) {
             return this.getViewMoreItems(searchRequest)
         }
 
-        let result: {
-            isLastPage: boolean;
-            manga: Highlight[]
-        }
+        let result: PagedSearchResult
         let manga: Highlight[] = []
         let isLastPage = false
 
         while (manga.length == 0)
         {
-            result = await this.search(searchRequest)
+            result = await this.executeSearch(searchRequest)
             isLastPage = result.isLastPage
-            manga = result.manga
+            manga = result.results
         }
 
         return {
@@ -381,17 +371,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         }
     }
 
-    async getDirectoryConfig(configID?: string | undefined): Promise<DirectoryConfig> {
-        if (configID) {
-            return { searchable: false }
-        }
-
-        return {
-            filters: await this.getFilters(),
-        }
-    }
-
-    private async search(query: SearchRequest<FilterProps>): Promise<{isLastPage: boolean, manga: Highlight[]}> {
+    private async executeSearch(query: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         const page: number = query?.page ?? 1
 
         const request = await this.constructSearchRequest(page, query)
@@ -406,7 +386,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         const manga: Highlight[] = []
         for (const result of results) {
             if (chapterTag) {
-                const chapterCount = parseInt(chapterTag)
+                const chapterCount = parseInt(chapterTag.id)
                 const chapterCountRegex = result.subtitle?.match(/(\d+)/)
                 if (chapterCountRegex?.[1] && parseInt(chapterCountRegex[1]) < chapterCount)
                     continue
@@ -427,7 +407,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
 
         return {
             isLastPage: this.parser.isLastPage($, query?.query ? 'search_request' : 'view_more'),
-            manga
+            results: manga
         }
     }
 

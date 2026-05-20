@@ -9,7 +9,7 @@ import {
     PageLink,
     PageLinkResolver,
     PageSection,
-    SearchFilter,
+    SearchForm,
     SearchRequest,
     SortOption,
     SourceInfo
@@ -19,7 +19,7 @@ import { HOME_SECTIONS, SOURCE_INFO, STATUS_TYPES } from './AsuraScansInfo'
 import { FilterProps, StatusTypes } from './AsuraScansInterfaces'
 import { AsuraScansBase } from './AsuraScansBase'
 import { getContent, getChapters, getChapterData } from './AsuraScansContent'
-import { search, getSearchFilters, constructSearchUrl, getSortOptions } from './AsuraScansSearch'
+import { search, getSearchForm, constructSearchUrl, getSortOptions } from './AsuraScansSearch'
 
 export class Target extends AsuraScansBase implements ContentSource, PageLinkResolver {
 
@@ -32,7 +32,7 @@ export class Target extends AsuraScansBase implements ContentSource, PageLinkRes
     async getChapterData(mangaId: string, chapterId: string, chapter?: Chapter): Promise<ChapterData> { return getChapterData(this.client, this.parser, mangaId, chapterId, chapter) }
 
     async getSortOptions(): Promise<SortOption[]> { return getSortOptions() }
-    async getSearchFilters(): Promise<SearchFilter[]> { return getSearchFilters(this.client, this.parser) }
+    async getSearchForm(): Promise<SearchForm> { return getSearchForm(this.client, this.parser) }
     async search(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> { return search(this.client, this.parser, searchRequest) }
     async constructSearchRequest(page: number, query: SearchRequest<FilterProps>): Promise<any> {
         return { url: constructSearchUrl((page - 1) * 20, query), method: 'GET' }

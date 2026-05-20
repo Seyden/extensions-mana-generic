@@ -1,4 +1,4 @@
-import { PagedSearchResult, SearchFilter, SearchRequest, SortOption } from '@mana-app/types'
+import { PagedSearchResult, SearchForm, SearchRequest, SortOption } from '@mana-app/types'
 import { FilterProps, GenresResponse, orderOptions, SeriesSearchResponse } from './AsuraScansInterfaces'
 import { getSelectValue, loadJsonData } from './AsuraScansHelper'
 import { ASURASCANS_API_DOMAIN } from './AsuraScansInfo'
@@ -16,7 +16,7 @@ export async function getSortOptions(): Promise<SortOption[]> {
     }))
 }
 
-export async function getSearchFilters(client: NetworkClient, parser: AsuraScansParser): Promise<SearchFilter[]> {
+export async function getSearchForm(client: NetworkClient, parser: AsuraScansParser): Promise<SearchForm> {
     const { data: genres } = await loadJsonData<GenresResponse>(client, `${ASURASCANS_API_DOMAIN}/api/genres`)
     return parser.parseTags(genres ?? [])
 }
@@ -44,13 +44,15 @@ export function constructSearchUrl(offset: number, query: SearchRequest<FilterPr
         urlBuilder = urlBuilder.addQueryParameter('name', encodeURIComponent(query.query))
     }
 
-    const sort = getSelectValue(query?.filters?.order)
+    const sort = getSelectValue(query?.sort?.id)
+    const genres = query.filters?.genres?.map((g) => g.title.toLowerCase())
+
     urlBuilder = urlBuilder
         .addQueryParameter('status', getSelectValue(query?.filters?.status))
         .addQueryParameter('type', getSelectValue(query?.filters?.type))
         .addQueryParameter('sort', sort ?? 'latest')
-        .addQueryParameter('order', 'desc')
-        .addQueryParameter('genres', query.filters?.genres)
+        .addQueryParameter('order', query?.sort?.ascending ? 'asc' : 'desc')
+        .addQueryParameter('genres', genres)
         .addQueryParameter('min_chapters', getSelectValue(query?.filters?.chapters))
 
     return urlBuilder.buildUrl({ addTrailingSlash: false, includeUndefinedParameters: false })

@@ -3,9 +3,7 @@ import {
     ChapterData,
     Content,
     ContentSource,
-    SearchFilter,
     SearchRequest,
-    FilterType,
     Form,
     Highlight,
     ImageRequestHandler,
@@ -20,7 +18,11 @@ import {
     SourceInfo,
     SectionStyle,
     Tag,
-    UIToggle
+    UIToggle,
+    SearchTagsSection,
+    SearchMultiPicker,
+    SearchForm,
+    Option
 } from '@mana-app/types'
 
 import { Parser } from './MadaraParser'
@@ -254,15 +256,19 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         return this.parser.parseChapterDetails($, mangaId, chapterId, this.chapterDetailsSelector, this)
     }
 
-    async getSearchFilters(): Promise<SearchFilter[]> {
-        const genres: SearchFilter = {
-            id: "genres",
-            title: "Genres",
-            type: FilterType.MULTISELECT,
-            options: (await this.getGenreTags()),
+    async getSearchForm(): Promise<SearchForm> {
+        return {
+            sections: [
+                SearchTagsSection({
+                    header: 'Genres',
+                    field: SearchMultiPicker({
+                        id: 'genres',
+                        title: 'Genres',
+                        options: (await this.getGenreTags())
+                    })
+                })
+            ]
         };
-
-        return [genres];
     }
 
     async getGenreTags(): Promise<Tag[]> {
@@ -497,7 +503,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 .addPathComponent(page.toString())
                 .addQueryParameter('s', encodeURIComponent(request?.query ?? ''))
                 .addQueryParameter('post_type', 'wp-manga')
-                .addQueryParameter('genre', genres?.map((x: string) => x))
+                .addQueryParameter('genre', genres?.map((x: Option) => x.id))
                 .buildUrl({ addTrailingSlash: true, includeUndefinedParameters: false }),
             method: 'GET'
         }

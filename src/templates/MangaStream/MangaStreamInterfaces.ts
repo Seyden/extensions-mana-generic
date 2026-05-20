@@ -1,4 +1,4 @@
-import { ExcludableMultiSelectProp } from '@mana-app/types'
+import { ExcludableMultiSelectProp, Option } from '@mana-app/types'
 
 export interface Months {
     january: string;
@@ -22,10 +22,10 @@ export interface StatusTypes {
 }
 
 export type FilterProps = {
-    status?: string; // select
-    type?: string; // select
-    order?: string; // select
-    chapters?: string; // select
+    status?: Option; // select
+    type?: Option; // select
+    order?: Option; // select
+    chapters?: Option; // select
 
-    genres?: string[] | ExcludableMultiSelectProp;
+    genres?: Option[] | ExcludableMultiSelectProp;
 };

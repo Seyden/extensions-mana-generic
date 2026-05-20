@@ -1,7 +1,7 @@
 import {
     PageSection,
     SectionStyle,
-    Tag
+    Option
 } from '@mana-app/types'
 
 export interface HomeSectionData {
@@ -26,25 +26,25 @@ export function createHomeSection(id: string, title: string, containsMoreItems: 
         id,
         title,
         style,
-        viewMoreLink: containsMoreItems ? { request: { page: 1, listId: id, configID: id } } : undefined,
+        viewMoreLink: containsMoreItems ? { request: { page: 1, listId: id } } : undefined,
     }
 }
 
-export function getSelectValue(filterValue: string | undefined): any {
-    return filterValue?.replace(' ', '+')
+export function getSelectValue(filterValue: Option | undefined): any {
+    return filterValue?.id?.replace(' ', '+')
 }
 
-export function getIncludedTagBySection(section: string, tags: Tag[]): any {
-    return (tags?.find((x: Tag) => x.id.startsWith(`${section}:`))?.id.replace(`${section}:`, '') ?? '').replace(' ', '+')
+export function getIncludedTagBySection(section: string, tags: Option[]): any {
+    return (tags?.find((x: Option) => x.id.startsWith(`${section}:`))?.id.replace(`${section}:`, '') ?? '').replace(' ', '+')
 }
 
-export function getFilterTagsBySection(tags: string[], included: boolean, supportsExclusion: boolean = false): string[] {
+export function getFilterTagsBySection(tags: Option[], included: boolean, supportsExclusion: boolean = false): string[] {
     if (!included && !supportsExclusion) {
         return []
     }
 
-    return tags?.map((x: string) => {
-        let id: string = x
+    return tags?.map((x: Option) => {
+        let id: string = x.id
         if (!included) {
             id = encodeURI(`-${id}`)
         }

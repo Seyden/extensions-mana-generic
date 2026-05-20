@@ -3,7 +3,8 @@ import {
     NetworkResponse,
     PageSection,
     SectionStyle,
-    Tag
+    Tag,
+    Option
 } from '@mana-app/types'
 import { load } from 'cheerio'
 
@@ -21,12 +22,12 @@ export function createHomeSection(id: string, title: string, subtitle: string | 
         title,
         subtitle,
         style,
-        viewMoreLink: containsMoreItems ? { request: { page: 1, listId: id, configID: id } } : undefined,
+        viewMoreLink: containsMoreItems ? { request: { page: 1, listId: id } } : undefined,
     }
 }
 
-export function getSelectValue(filterValue: string | undefined): any {
-    return filterValue?.replace(' ', '+')
+export function getSelectValue(filterValue: Option | undefined): any {
+    return filterValue?.id?.replace(' ', '+')
 }
 
 export function getIncludedTagBySection(section: string, tags: Tag[]): any {

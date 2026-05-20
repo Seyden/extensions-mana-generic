@@ -1,3 +1,5 @@
+import { Option } from "@mana-app/types";
+
 export interface StatusTypes {
     ONGOING: string;
     HIATUS: string;
@@ -8,12 +10,11 @@ export interface StatusTypes {
 }
 
 export type FilterProps = {
-    status?: string; // select
-    type?: string; // select
-    order?: string; // select
-    chapters?: string; // select
+    status?: Option; // select
+    type?: Option; // select
+    chapters?: Option; // select
 
-    genres?: string[];
+    genres?: Option[];
 };
 
 export const statusOptions = [

@@ -5,17 +5,22 @@ import {
     ChapterPage,
     Content,
     ContentType,
-    FilterType,
     Highlight,
     Option,
     PublicationStatus,
-    SearchFilter,
+    SearchForm,
+    SearchListSection,
+    SearchMultiPicker,
+    SearchPicker,
+    SearchSortSection,
+    SearchTagsSection,
     SectionStyle,
     Tag,
     staff,
     StaffSection,
     ReadingMode,
-    Pair
+    Pair,
+    SearchSortStyle
 } from '@mana-app/types'
 
 import {
@@ -26,7 +31,6 @@ import {
     ChapterDetail,
     Genre,
     HomeFeedChapter,
-    orderOptions,
     SeriesChapter,
     SeriesDetail,
     SeriesSearchItem,
@@ -88,7 +92,7 @@ export class AsuraScansParser{
             title: genre.name
         }))
 
-        const additionalInfo: StaffSection[] | undefined = 
+        const additionalInfo: StaffSection[] | undefined =
             author || artist ? [staff.section({
                 id: "staff",
                 title: "Staff",
@@ -169,7 +173,7 @@ export class AsuraScansParser{
         }
     }
 
-    parseTags(genres: Genre[]): SearchFilter[] {
+    parseTags(genres: Genre[]): SearchForm {
         const predefinedChaptersTags: Option[] = [
             { id: '10', title: '+10' },
             { id: '20', title: '+20' },
@@ -189,38 +193,42 @@ export class AsuraScansParser{
         const toPreset = (items: { value: string; label: string }[]): Option[] =>
             items.map((item) => ({ id: item.value, title: item.label }))
 
-        return [
-            {
-                id: 'chapters',
-                title: 'Chapters',
-                type: FilterType.SELECT,
-                options: predefinedChaptersTags
-            },
-            {
-                id: 'genres',
-                title: 'Genres',
-                type: FilterType.MULTISELECT,
-                options: genres.map((g) => ({ id: `${g.id}`, title: g.name }))
-            },
-            {
-                id: 'status',
-                title: 'Status',
-                type: FilterType.SELECT,
-                options: toPreset(statusOptions)
-            },
-            {
-                id: 'type',
-                title: 'Type',
-                type: FilterType.SELECT,
-                options: toPreset(typeOptions)
-            },
-            {
-                id: 'order',
-                title: 'Order',
-                type: FilterType.SELECT,
-                options: toPreset(orderOptions)
-            }
-        ]
+        return {
+            sections: [
+                SearchTagsSection({
+                    header: 'Genres',
+                    field: SearchMultiPicker({
+                        id: 'genres',
+                        title: 'Genres',
+                        options: genres.map((g) => ({ id: `${g.id}`, title: g.name }))
+                    })
+                }),
+                SearchListSection({
+                    header: 'Filters',
+                    children: [
+                        SearchPicker({
+                            id: 'chapters',
+                            title: 'Chapters',
+                            options: predefinedChaptersTags
+                        }),
+                        SearchPicker({
+                            id: 'status',
+                            title: 'Status',
+                            options: toPreset(statusOptions)
+                        }),
+                        SearchPicker({
+                            id: 'type',
+                            title: 'Type',
+                            options: toPreset(typeOptions)
+                        })
+                    ]
+                }),
+                SearchSortSection({
+                    header: 'Sort',
+                    style: SearchSortStyle.PICKER
+                })
+            ]
+        }
     }
 
     parseSearchResults(items: SeriesSearchItem[]): Highlight[] {

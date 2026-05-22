@@ -41,10 +41,10 @@ export function constructSearchUrl(offset: number, query: SearchRequest<FilterPr
         .addQueryParameter('offset', offset.toString())
 
     if (query?.query) {
-        urlBuilder = urlBuilder.addQueryParameter('name', encodeURIComponent(query.query))
+        urlBuilder = urlBuilder.addQueryParameter('search', encodeURIComponent(query.query))
     }
 
-    const sort = getSelectValue(query?.sort?.id)
+    const sort = query?.sort?.id
     const genres = query.filters?.genres?.map((g) => g.title.toLowerCase())
 
     urlBuilder = urlBuilder

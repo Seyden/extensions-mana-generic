@@ -14,7 +14,7 @@ export class Target extends Madara {
         version: getExportVersion('0.0.0'),
         name: 'HiperDex',
         thumbnail: 'HiperDex.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: DOMAIN,
     }
 

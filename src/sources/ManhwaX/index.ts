@@ -15,7 +15,7 @@ export class Target extends MangaStream {
         version: getExportVersion('0.0.0'),
         name: 'ManhwaX',
         thumbnail: 'ManhwaX.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: MANHWAX_DOMAIN,
     }
 

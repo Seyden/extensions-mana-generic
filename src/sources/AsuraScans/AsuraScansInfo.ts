@@ -13,7 +13,6 @@ export const SOURCE_INFO: SourceInfo = {
     id: 'AsuraScans',
     version: "1.0.0",
     name: 'AsuraScans',
-    description: 'AsuraScans is a manga reader that allows you to read manga online.',
     thumbnail: 'AsuraScans.png',
     rating: CatalogRating.MIXED,
     website: ASURASCANS_DOMAIN,

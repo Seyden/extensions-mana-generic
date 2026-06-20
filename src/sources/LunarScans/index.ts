@@ -14,7 +14,7 @@ export class Target extends MangaStream {
         version: getExportVersion('0.0.0'),
         name: 'LunarScans',
         thumbnail: 'LuaScans.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: DOMAIN,
     }
 

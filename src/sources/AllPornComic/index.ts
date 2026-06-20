@@ -13,7 +13,7 @@ export class Target extends Madara {
         version: getExportVersion('0.0.0'),
         name: 'AllPornComic',
         thumbnail: 'AllPornComic.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: DOMAIN,
     }
 

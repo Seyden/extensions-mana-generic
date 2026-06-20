@@ -26,7 +26,7 @@ export class Target extends Madara {
         version: getExportVersion('0.0.0'),
         name: 'SamuraiScan',
         thumbnail: 'SamuraiScan.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: DOMAIN,
 
     }

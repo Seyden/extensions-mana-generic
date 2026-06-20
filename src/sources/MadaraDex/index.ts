@@ -14,9 +14,9 @@ export class Target extends Madara {
         version: getExportVersion('0.0.0'),
         name: 'Madaradex',
         thumbnail: 'Madaradex.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: DOMAIN,
-        
+
     }
 
     baseUrl: string = DOMAIN

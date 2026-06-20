@@ -20,7 +20,8 @@ import {
     StaffSection,
     ReadingMode,
     Pair,
-    SearchSortStyle
+    SearchSortStyle,
+    ContentRating
 } from '@mana-app/types'
 
 import {
@@ -113,6 +114,7 @@ export class AsuraScansParser{
             additionalInfo,
             //...(chapters.length > 0 && { chapters }),
             contentType: ContentType.MANHWA,
+            contentRating: ContentRating.SUGGESTIVE,
             recommendedPanelMode: ReadingMode.WEBTOON
         }
     }

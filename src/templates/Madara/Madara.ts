@@ -641,7 +641,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         switch (status) {
             case 403:
             case 503:
-                throw new CloudflareError(response.request.url)
+                throw new CloudflareError(this.bypassPage || this.baseUrl)
             case 404:
                 throw new Error(`The requested page ${response.request.url} was not found!`)
         }

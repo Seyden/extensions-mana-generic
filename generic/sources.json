@@ -167,7 +167,7 @@
     },
     {
       "id": "Comix",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "name": "Comix",
       "description": "Read manga, manhwa, manhua, and comics from Comix.",
       "thumbnail": "Comix.png",
@@ -191,7 +191,7 @@
       "path": "Comix",
       "environment": "source",
       "intents": 2104333,
-      "hash": "368533ca368533ca368533ca368533ca368533ca368533ca368533ca368533ca"
+      "hash": "7252e7d97252e7d97252e7d97252e7d97252e7d97252e7d97252e7d97252e7d9"
     },
     {
       "id": "CypherScans",

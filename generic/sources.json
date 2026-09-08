@@ -1,6 +1,4 @@
 {
-  "repositoryName": "Seyden | Mana - Generic (1.0)",
-  "thumbnail": "https://avatars.githubusercontent.com/u/639817",
   "sources": [
     {
       "id": "AllPornComic",
@@ -12,7 +10,7 @@
       "path": "AllPornComic",
       "environment": "source",
       "intents": 2100237,
-      "hash": "62f6714c62f6714c62f6714c62f6714c62f6714c62f6714c62f6714c62f6714c"
+      "hash": "16db4aaa16db4aaa16db4aaa16db4aaa16db4aaa16db4aaa16db4aaa16db4aaa"
     },
     {
       "id": "AnigliScans",
@@ -24,7 +22,7 @@
       "path": "AnigliScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "33a49ce933a49ce933a49ce933a49ce933a49ce933a49ce933a49ce933a49ce9"
+      "hash": "5289a43a5289a43a5289a43a5289a43a5289a43a5289a43a5289a43a5289a43a"
     },
     {
       "id": "ArthurScan",
@@ -36,7 +34,7 @@
       "path": "ArthurScan",
       "environment": "source",
       "intents": 2100237,
-      "hash": "3f70bdbc3f70bdbc3f70bdbc3f70bdbc3f70bdbc3f70bdbc3f70bdbc3f70bdbc"
+      "hash": "3a61019e3a61019e3a61019e3a61019e3a61019e3a61019e3a61019e3a61019e"
     },
     {
       "id": "ArvenScans",
@@ -48,7 +46,7 @@
       "path": "ArvenScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0bffb2590bffb2590bffb2590bffb2590bffb2590bffb2590bffb2590bffb259"
+      "hash": "6dd20c456dd20c456dd20c456dd20c456dd20c456dd20c456dd20c456dd20c45"
     },
     {
       "id": "AstraScans",
@@ -60,7 +58,7 @@
       "path": "AstraScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0085a4f20085a4f20085a4f20085a4f20085a4f20085a4f20085a4f20085a4f2"
+      "hash": "7a5760ca7a5760ca7a5760ca7a5760ca7a5760ca7a5760ca7a5760ca7a5760ca"
     },
     {
       "id": "AstralLibrary",
@@ -72,11 +70,11 @@
       "path": "AstralLibrary",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0ef388db0ef388db0ef388db0ef388db0ef388db0ef388db0ef388db0ef388db"
+      "hash": "773abb50773abb50773abb50773abb50773abb50773abb50773abb50773abb50"
     },
     {
       "id": "AsuraScans",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "name": "AsuraScans",
       "thumbnail": "AsuraScans.png",
       "rating": 1,
@@ -103,11 +101,11 @@
       "path": "AsuraScans",
       "environment": "source",
       "intents": 2104333,
-      "hash": "64c2df8364c2df8364c2df8364c2df8364c2df8364c2df8364c2df8364c2df83"
+      "hash": "4f5f477a4f5f477a4f5f477a4f5f477a4f5f477a4f5f477a4f5f477a4f5f477a"
     },
     {
       "id": "Atsumaru",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "name": "Atsumaru",
       "description": "Read manga, manhwa, manhua, and comics from Atsumaru.",
       "thumbnail": "https://atsu.moe/favicon/apple-touch-icon-180x180.png",
@@ -131,7 +129,7 @@
       "path": "Atsumaru",
       "environment": "source",
       "intents": 6298636,
-      "hash": "75a16b0875a16b0875a16b0875a16b0875a16b0875a16b0875a16b0875a16b08"
+      "hash": "69a5ce8d69a5ce8d69a5ce8d69a5ce8d69a5ce8d69a5ce8d69a5ce8d69a5ce8d"
     },
     {
       "id": "AzoraWorld",
@@ -143,7 +141,7 @@
       "path": "AzoraWorld",
       "environment": "source",
       "intents": 2100237,
-      "hash": "7f86a8677f86a8677f86a8677f86a8677f86a8677f86a8677f86a8677f86a867"
+      "hash": "06a79ba006a79ba006a79ba006a79ba006a79ba006a79ba006a79ba006a79ba0"
     },
     {
       "id": "BibiManga",
@@ -155,7 +153,7 @@
       "path": "BibiManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "2cd5ae3e2cd5ae3e2cd5ae3e2cd5ae3e2cd5ae3e2cd5ae3e2cd5ae3e2cd5ae3e"
+      "hash": "5958920c5958920c5958920c5958920c5958920c5958920c5958920c5958920c"
     },
     {
       "id": "ChibiManga",
@@ -167,7 +165,7 @@
       "path": "ChibiManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "166e836d166e836d166e836d166e836d166e836d166e836d166e836d166e836d"
+      "hash": "6fbfc0a16fbfc0a16fbfc0a16fbfc0a16fbfc0a16fbfc0a16fbfc0a16fbfc0a1"
     },
     {
       "id": "CoffeeManga",
@@ -179,7 +177,7 @@
       "path": "CoffeeManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0f2dace70f2dace70f2dace70f2dace70f2dace70f2dace70f2dace70f2dace7"
+      "hash": "6aa40f106aa40f106aa40f106aa40f106aa40f106aa40f106aa40f106aa40f10"
     },
     {
       "id": "ColoredManga",
@@ -191,7 +189,7 @@
       "path": "ColoredManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "5910784c5910784c5910784c5910784c5910784c5910784c5910784c5910784c"
+      "hash": "20c146f020c146f020c146f020c146f020c146f020c146f020c146f020c146f0"
     },
     {
       "id": "Comix",
@@ -219,7 +217,7 @@
       "path": "Comix",
       "environment": "source",
       "intents": 2104333,
-      "hash": "15e4fb9b15e4fb9b15e4fb9b15e4fb9b15e4fb9b15e4fb9b15e4fb9b15e4fb9b"
+      "hash": "7049459f7049459f7049459f7049459f7049459f7049459f7049459f7049459f"
     },
     {
       "id": "CypherScans",
@@ -231,7 +229,7 @@
       "path": "CypherScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0b1b4b7f0b1b4b7f0b1b4b7f0b1b4b7f0b1b4b7f0b1b4b7f0b1b4b7f0b1b4b7f"
+      "hash": "6eb66fbc6eb66fbc6eb66fbc6eb66fbc6eb66fbc6eb66fbc6eb66fbc6eb66fbc"
     },
     {
       "id": "DarkScans",
@@ -243,7 +241,7 @@
       "path": "DarkScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "490a3943490a3943490a3943490a3943490a3943490a3943490a3943490a3943"
+      "hash": "30c785d930c785d930c785d930c785d930c785d930c785d930c785d930c785d9"
     },
     {
       "id": "DragonTea",
@@ -255,7 +253,7 @@
       "path": "DragonTea",
       "environment": "source",
       "intents": 2100237,
-      "hash": "69926c6369926c6369926c6369926c6369926c6369926c6369926c6369926c63"
+      "hash": "103f4f77103f4f77103f4f77103f4f77103f4f77103f4f77103f4f77103f4f77"
     },
     {
       "id": "DrakeScans",
@@ -267,7 +265,7 @@
       "path": "DrakeScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "17c7722217c7722217c7722217c7722217c7722217c7722217c7722217c77222"
+      "hash": "620a4a14620a4a14620a4a14620a4a14620a4a14620a4a14620a4a14620a4a14"
     },
     {
       "id": "ElarcToon",
@@ -279,7 +277,7 @@
       "path": "ElarcToon",
       "environment": "source",
       "intents": 2100237,
-      "hash": "715972d2715972d2715972d2715972d2715972d2715972d2715972d2715972d2"
+      "hash": "08789edf08789edf08789edf08789edf08789edf08789edf08789edf08789edf"
     },
     {
       "id": "FlameComics",
@@ -291,7 +289,7 @@
       "path": "FlameComics",
       "environment": "source",
       "intents": 2100237,
-      "hash": "4c31a4414c31a4414c31a4414c31a4414c31a4414c31a4414c31a4414c31a441"
+      "hash": "2da06cb92da06cb92da06cb92da06cb92da06cb92da06cb92da06cb92da06cb9"
     },
     {
       "id": "FreakScans",
@@ -303,7 +301,7 @@
       "path": "FreakScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6cc422b16cc422b16cc422b16cc422b16cc422b16cc422b16cc422b16cc422b1"
+      "hash": "1969cc101969cc101969cc101969cc101969cc101969cc101969cc101969cc10"
     },
     {
       "id": "GourmetScans",
@@ -315,7 +313,7 @@
       "path": "GourmetScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0ea4fb610ea4fb610ea4fb610ea4fb610ea4fb610ea4fb610ea4fb610ea4fb61"
+      "hash": "7789458877894588778945887789458877894588778945887789458877894588"
     },
     {
       "id": "Hentai20",
@@ -327,7 +325,7 @@
       "path": "Hentai20",
       "environment": "source",
       "intents": 2100237,
-      "hash": "78c83a5e78c83a5e78c83a5e78c83a5e78c83a5e78c83a5e78c83a5e78c83a5e"
+      "hash": "0d65b7150d65b7150d65b7150d65b7150d65b7150d65b7150d65b7150d65b715"
     },
     {
       "id": "HiperDex",
@@ -339,7 +337,7 @@
       "path": "HiperDex",
       "environment": "source",
       "intents": 2100237,
-      "hash": "5e83fa005e83fa005e83fa005e83fa005e83fa005e83fa005e83fa005e83fa00"
+      "hash": "1b4dc2711b4dc2711b4dc2711b4dc2711b4dc2711b4dc2711b4dc2711b4dc271"
     },
     {
       "id": "HuntManga",
@@ -351,7 +349,7 @@
       "path": "HuntManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "52d5cae652d5cae652d5cae652d5cae652d5cae652d5cae652d5cae652d5cae6"
+      "hash": "26fc46d026fc46d026fc46d026fc46d026fc46d026fc46d026fc46d026fc46d0"
     },
     {
       "id": "ImmortalUpdates",
@@ -363,7 +361,7 @@
       "path": "ImmortalUpdates",
       "environment": "source",
       "intents": 2100237,
-      "hash": "22ba698322ba698322ba698322ba698322ba698322ba698322ba698322ba6983"
+      "hash": "5717ab515717ab515717ab515717ab515717ab515717ab515717ab515717ab51"
     },
     {
       "id": "InfernalVoidScans",
@@ -375,7 +373,7 @@
       "path": "InfernalVoidScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "60ce69d060ce69d060ce69d060ce69d060ce69d060ce69d060ce69d060ce69d0"
+      "hash": "1903af891903af891903af891903af891903af891903af891903af891903af89"
     },
     {
       "id": "KissManga",
@@ -387,7 +385,7 @@
       "path": "KissManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "4db7a9434db7a9434db7a9434db7a9434db7a9434db7a9434db7a9434db7a943"
+      "hash": "3876396d3876396d3876396d3876396d3876396d3876396d3876396d3876396d"
     },
     {
       "id": "KnightNoScanlation",
@@ -399,7 +397,7 @@
       "path": "KnightNoScanlation",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6ae46d466ae46d466ae46d466ae46d466ae46d466ae46d466ae46d466ae46d46"
+      "hash": "0eeda46b0eeda46b0eeda46b0eeda46b0eeda46b0eeda46b0eeda46b0eeda46b"
     },
     {
       "id": "KunManga",
@@ -411,7 +409,7 @@
       "path": "KunManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "4ed933454ed933454ed933454ed933454ed933454ed933454ed933454ed93345"
+      "hash": "3754b6533754b6533754b6533754b6533754b6533754b6533754b6533754b653"
     },
     {
       "id": "LHTranslation",
@@ -423,7 +421,7 @@
       "path": "LHTranslation",
       "environment": "source",
       "intents": 2100237,
-      "hash": "22281bbc22281bbc22281bbc22281bbc22281bbc22281bbc22281bbc22281bbc"
+      "hash": "6405d2e86405d2e86405d2e86405d2e86405d2e86405d2e86405d2e86405d2e8"
     },
     {
       "id": "LSComic",
@@ -435,7 +433,7 @@
       "path": "LSComic",
       "environment": "source",
       "intents": 2100237,
-      "hash": "269bc3a0269bc3a0269bc3a0269bc3a0269bc3a0269bc3a0269bc3a0269bc3a0"
+      "hash": "5f9226365f9226365f9226365f9226365f9226365f9226365f9226365f922636"
     },
     {
       "id": "LelManga",
@@ -447,7 +445,7 @@
       "path": "LelManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "598f8753598f8753598f8753598f8753598f8753598f8753598f8753598f8753"
+      "hash": "2042874f2042874f2042874f2042874f2042874f2042874f2042874f2042874f"
     },
     {
       "id": "LilyManga",
@@ -459,7 +457,7 @@
       "path": "LilyManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "7100150071001500710015007100150071001500710015007100150071001500"
+      "hash": "152dce0c152dce0c152dce0c152dce0c152dce0c152dce0c152dce0c152dce0c"
     },
     {
       "id": "LuaScans",
@@ -471,7 +469,7 @@
       "path": "LuaScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "48f866fe48f866fe48f866fe48f866fe48f866fe48f866fe48f866fe48f866fe"
+      "hash": "3d3578343d3578343d3578343d3578343d3578343d3578343d3578343d357834"
     },
     {
       "id": "LuminousScans",
@@ -483,7 +481,7 @@
       "path": "LuminousScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6184fb4a6184fb4a6184fb4a6184fb4a6184fb4a6184fb4a6184fb4a6184fb4a"
+      "hash": "184d214e184d214e184d214e184d214e184d214e184d214e184d214e184d214e"
     },
     {
       "id": "LunarScans",
@@ -495,7 +493,7 @@
       "path": "LunarScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "72f531c072f531c072f531c072f531c072f531c072f531c072f531c072f531c0"
+      "hash": "1338b1251338b1251338b1251338b1251338b1251338b1251338b1251338b125"
     },
     {
       "id": "Madaradex",
@@ -507,7 +505,7 @@
       "path": "Madaradex",
       "environment": "source",
       "intents": 2100237,
-      "hash": "4e5644fc4e5644fc4e5644fc4e5644fc4e5644fc4e5644fc4e5644fc4e5644fc"
+      "hash": "37d79dd037d79dd037d79dd037d79dd037d79dd037d79dd037d79dd037d79dd0"
     },
     {
       "id": "Manga3S",
@@ -519,7 +517,7 @@
       "path": "Manga3S",
       "environment": "source",
       "intents": 2100237,
-      "hash": "03f15a1003f15a1003f15a1003f15a1003f15a1003f15a1003f15a1003f15a10"
+      "hash": "7dc373487dc373487dc373487dc373487dc373487dc373487dc373487dc37348"
     },
     {
       "id": "Manga3asq",
@@ -531,7 +529,7 @@
       "path": "Manga3asq",
       "environment": "source",
       "intents": 2100237,
-      "hash": "586f8a32586f8a32586f8a32586f8a32586f8a32586f8a32586f8a32586f8a32"
+      "hash": "2162930121629301216293012162930121629301216293012162930121629301"
     },
     {
       "id": "MangaBob",
@@ -543,7 +541,7 @@
       "path": "MangaBob",
       "environment": "source",
       "intents": 2100237,
-      "hash": "7ff0bc3a7ff0bc3a7ff0bc3a7ff0bc3a7ff0bc3a7ff0bc3a7ff0bc3a7ff0bc3a"
+      "hash": "063d2638063d2638063d2638063d2638063d2638063d2638063d2638063d2638"
     },
     {
       "id": "MangaClash",
@@ -555,7 +553,7 @@
       "path": "MangaClash",
       "environment": "source",
       "intents": 2100237,
-      "hash": "22441b4322441b4322441b4322441b4322441b4322441b4322441b4322441b43"
+      "hash": "578e02af578e02af578e02af578e02af578e02af578e02af578e02af578e02af"
     },
     {
       "id": "MangaCultivator",
@@ -567,11 +565,11 @@
       "path": "MangaCultivator",
       "environment": "source",
       "intents": 2100237,
-      "hash": "05a403ff05a403ff05a403ff05a403ff05a403ff05a403ff05a403ff05a403ff"
+      "hash": "742e18f0742e18f0742e18f0742e18f0742e18f0742e18f0742e18f0742e18f0"
     },
     {
       "id": "MangaDot",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "name": "MangaDot",
       "description": "Read manga, manhwa, and manhua from MangaDot.",
       "thumbnail": "MangaDot.png",
@@ -595,7 +593,7 @@
       "path": "MangaDot",
       "environment": "source",
       "intents": 2104333,
-      "hash": "1e66df0d1e66df0d1e66df0d1e66df0d1e66df0d1e66df0d1e66df0d1e66df0d"
+      "hash": "32422e5a32422e5a32422e5a32422e5a32422e5a32422e5a32422e5a32422e5a"
     },
     {
       "id": "MangaLek",
@@ -607,7 +605,7 @@
       "path": "MangaLek",
       "environment": "source",
       "intents": 2100237,
-      "hash": "3f51bb033f51bb033f51bb033f51bb033f51bb033f51bb033f51bb033f51bb03"
+      "hash": "46dc24e346dc24e346dc24e346dc24e346dc24e346dc24e346dc24e346dc24e3"
     },
     {
       "id": "MangaReadOrg",
@@ -619,7 +617,7 @@
       "path": "MangaReadOrg",
       "environment": "source",
       "intents": 2100237,
-      "hash": "1fa71ee81fa71ee81fa71ee81fa71ee81fa71ee81fa71ee81fa71ee81fa71ee8"
+      "hash": "6686c30b6686c30b6686c30b6686c30b6686c30b6686c30b6686c30b6686c30b"
     },
     {
       "id": "MangaScantrad",
@@ -631,7 +629,7 @@
       "path": "MangaScantrad",
       "environment": "source",
       "intents": 2100237,
-      "hash": "2d2150202d2150202d2150202d2150202d2150202d2150202d2150202d215020"
+      "hash": "4cb0d0f84cb0d0f84cb0d0f84cb0d0f84cb0d0f84cb0d0f84cb0d0f84cb0d0f8"
     },
     {
       "id": "MangaTX",
@@ -643,7 +641,7 @@
       "path": "MangaTX",
       "environment": "source",
       "intents": 2100237,
-      "hash": "67798dbf67798dbf67798dbf67798dbf67798dbf67798dbf67798dbf67798dbf"
+      "hash": "1258969b1258969b1258969b1258969b1258969b1258969b1258969b1258969b"
     },
     {
       "id": "ManhuaFast",
@@ -655,7 +653,7 @@
       "path": "ManhuaFast",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0dc50aa20dc50aa20dc50aa20dc50aa20dc50aa20dc50aa20dc50aa20dc50aa2"
+      "hash": "6c0d162f6c0d162f6c0d162f6c0d162f6c0d162f6c0d162f6c0d162f6c0d162f"
     },
     {
       "id": "ManhuaPlus",
@@ -667,7 +665,7 @@
       "path": "ManhuaPlus",
       "environment": "source",
       "intents": 2100237,
-      "hash": "60ab535a60ab535a60ab535a60ab535a60ab535a60ab535a60ab535a60ab535a"
+      "hash": "2582886725828867258288672582886725828867258288672582886725828867"
     },
     {
       "id": "ManhuaSY",
@@ -679,7 +677,7 @@
       "path": "ManhuaSY",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6ae4509c6ae4509c6ae4509c6ae4509c6ae4509c6ae4509c6ae4509c6ae4509c"
+      "hash": "0eedcc780eedcc780eedcc780eedcc780eedcc780eedcc780eedcc780eedcc78"
     },
     {
       "id": "Manhuaus",
@@ -691,7 +689,7 @@
       "path": "Manhuaus",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0f05c1a40f05c1a40f05c1a40f05c1a40f05c1a40f05c1a40f05c1a40f05c1a4"
+      "hash": "7728195177281951772819517728195177281951772819517728195177281951"
     },
     {
       "id": "ManhwaFull",
@@ -703,7 +701,7 @@
       "path": "ManhwaFull",
       "environment": "source",
       "intents": 2100237,
-      "hash": "3ba95ebd3ba95ebd3ba95ebd3ba95ebd3ba95ebd3ba95ebd3ba95ebd3ba95ebd"
+      "hash": "4a8480c94a8480c94a8480c94a8480c94a8480c94a8480c94a8480c94a8480c9"
     },
     {
       "id": "ManhwaTop",
@@ -715,7 +713,7 @@
       "path": "ManhwaTop",
       "environment": "source",
       "intents": 2100237,
-      "hash": "24a03ac824a03ac824a03ac824a03ac824a03ac824a03ac824a03ac824a03ac8"
+      "hash": "5531e5395531e5395531e5395531e5395531e5395531e5395531e5395531e539"
     },
     {
       "id": "ManhwaX",
@@ -727,7 +725,7 @@
       "path": "ManhwaX",
       "environment": "source",
       "intents": 2100237,
-      "hash": "231e7b65231e7b65231e7b65231e7b65231e7b65231e7b65231e7b65231e7b65"
+      "hash": "56b3a15556b3a15556b3a15556b3a15556b3a15556b3a15556b3a15556b3a155"
     },
     {
       "id": "NightScans",
@@ -739,7 +737,7 @@
       "path": "NightScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "3a8765bd3a8765bd3a8765bd3a8765bd3a8765bd3a8765bd3a8765bd3a8765bd"
+      "hash": "4ba67c954ba67c954ba67c954ba67c954ba67c954ba67c954ba67c954ba67c95"
     },
     {
       "id": "NovelMic",
@@ -751,7 +749,7 @@
       "path": "NovelMic",
       "environment": "source",
       "intents": 2100237,
-      "hash": "32b1849932b1849932b1849932b1849932b1849932b1849932b1849932b18499"
+      "hash": "537c5a95537c5a95537c5a95537c5a95537c5a95537c5a95537c5a95537c5a95"
     },
     {
       "id": "PianManga",
@@ -763,7 +761,7 @@
       "path": "PianManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "35988e5735988e5735988e5735988e5735988e5735988e5735988e5735988e57"
+      "hash": "443991e1443991e1443991e1443991e1443991e1443991e1443991e1443991e1"
     },
     {
       "id": "PlatinumScans",
@@ -775,7 +773,7 @@
       "path": "PlatinumScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "10a5660610a5660610a5660610a5660610a5660610a5660610a5660610a56606"
+      "hash": "692cbb2e692cbb2e692cbb2e692cbb2e692cbb2e692cbb2e692cbb2e692cbb2e"
     },
     {
       "id": "QuantumScans",
@@ -787,7 +785,7 @@
       "path": "QuantumScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "2bc087e52bc087e52bc087e52bc087e52bc087e52bc087e52bc087e52bc087e5"
+      "hash": "4e1195a84e1195a84e1195a84e1195a84e1195a84e1195a84e1195a84e1195a8"
     },
     {
       "id": "RawKuma",
@@ -799,7 +797,7 @@
       "path": "RawKuma",
       "environment": "source",
       "intents": 2100237,
-      "hash": "72fd8c6172fd8c6172fd8c6172fd8c6172fd8c6172fd8c6172fd8c6172fd8c61"
+      "hash": "13304f0d13304f0d13304f0d13304f0d13304f0d13304f0d13304f0d13304f0d"
     },
     {
       "id": "ReadKomik",
@@ -811,7 +809,7 @@
       "path": "ReadKomik",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6a9167dc6a9167dc6a9167dc6a9167dc6a9167dc6a9167dc6a9167dc6a9167dc"
+      "hash": "0f40b9730f40b9730f40b9730f40b9730f40b9730f40b9730f40b9730f40b973"
     },
     {
       "id": "ReaperScansFR",
@@ -823,7 +821,7 @@
       "path": "ReaperScansFR",
       "environment": "source",
       "intents": 2100237,
-      "hash": "204595ba204595ba204595ba204595ba204595ba204595ba204595ba204595ba"
+      "hash": "598c8e60598c8e60598c8e60598c8e60598c8e60598c8e60598c8e60598c8e60"
     },
     {
       "id": "ResetScans",
@@ -835,7 +833,7 @@
       "path": "ResetScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0946345a0946345a0946345a0946345a0946345a0946345a0946345a0946345a"
+      "hash": "7ce7a74d7ce7a74d7ce7a74d7ce7a74d7ce7a74d7ce7a74d7ce7a74d7ce7a74d"
     },
     {
       "id": "SamuraiScan",
@@ -847,7 +845,7 @@
       "path": "SamuraiScan",
       "environment": "source",
       "intents": 2100237,
-      "hash": "6cc89b1f6cc89b1f6cc89b1f6cc89b1f6cc89b1f6cc89b1f6cc89b1f6cc89b1f"
+      "hash": "1965412d1965412d1965412d1965412d1965412d1965412d1965412d1965412d"
     },
     {
       "id": "SetsuScans",
@@ -859,7 +857,7 @@
       "path": "SetsuScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "06f3b54506f3b54506f3b54506f3b54506f3b54506f3b54506f3b54506f3b545"
+      "hash": "72de6ecf72de6ecf72de6ecf72de6ecf72de6ecf72de6ecf72de6ecf72de6ecf"
     },
     {
       "id": "Sinensis",
@@ -871,7 +869,7 @@
       "path": "Sinensis",
       "environment": "source",
       "intents": 2100237,
-      "hash": "3d57a3c83d57a3c83d57a3c83d57a3c83d57a3c83d57a3c83d57a3c83d57a3c8"
+      "hash": "48d63a6e48d63a6e48d63a6e48d63a6e48d63a6e48d63a6e48d63a6e48d63a6e"
     },
     {
       "id": "SkyMangas",
@@ -883,7 +881,7 @@
       "path": "SkyMangas",
       "environment": "source",
       "intents": 2100237,
-      "hash": "5fbe6a455fbe6a455fbe6a455fbe6a455fbe6a455fbe6a455fbe6a455fbe6a45"
+      "hash": "1a13b3131a13b3131a13b3131a13b3131a13b3131a13b3131a13b3131a13b313"
     },
     {
       "id": "SuryaScans",
@@ -895,7 +893,7 @@
       "path": "SuryaScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "517ff16e517ff16e517ff16e517ff16e517ff16e517ff16e517ff16e517ff16e"
+      "hash": "28522fc728522fc728522fc728522fc728522fc728522fc728522fc728522fc7"
     },
     {
       "id": "Sushi Scan",
@@ -907,7 +905,7 @@
       "path": "Sushi Scan",
       "environment": "source",
       "intents": 2100237,
-      "hash": "5813799f5813799f5813799f5813799f5813799f5813799f5813799f5813799f"
+      "hash": "2e1a64f22e1a64f22e1a64f22e1a64f22e1a64f22e1a64f22e1a64f22e1a64f2"
     },
     {
       "id": "TeamxNovel",
@@ -919,7 +917,7 @@
       "path": "TeamxNovel",
       "environment": "source",
       "intents": 2100237,
-      "hash": "12dc910012dc910012dc910012dc910012dc910012dc910012dc910012dc9100"
+      "hash": "73514d6e73514d6e73514d6e73514d6e73514d6e73514d6e73514d6e73514d6e"
     },
     {
       "id": "TeenManhua",
@@ -931,7 +929,7 @@
       "path": "TeenManhua",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0bd340a20bd340a20bd340a20bd340a20bd340a20bd340a20bd340a20bd340a2"
+      "hash": "6dfee33a6dfee33a6dfee33a6dfee33a6dfee33a6dfee33a6dfee33a6dfee33a"
     },
     {
       "id": "ToonGod",
@@ -943,7 +941,7 @@
       "path": "ToonGod",
       "environment": "source",
       "intents": 2100237,
-      "hash": "5aa9f6915aa9f6915aa9f6915aa9f6915aa9f6915aa9f6915aa9f6915aa9f691"
+      "hash": "2b83e5382b83e5382b83e5382b83e5382b83e5382b83e5382b83e5382b83e538"
     },
     {
       "id": "Toonily",
@@ -955,7 +953,7 @@
       "path": "Toonily",
       "environment": "source",
       "intents": 2100237,
-      "hash": "7cbd8cf87cbd8cf87cbd8cf87cbd8cf87cbd8cf87cbd8cf87cbd8cf87cbd8cf8"
+      "hash": "097052a8097052a8097052a8097052a8097052a8097052a8097052a8097052a8"
     },
     {
       "id": "VortexScans",
@@ -975,105 +973,7 @@
       "path": "Vortex Scans",
       "environment": "source",
       "intents": 2104332,
-      "hash": "6995ecc96995ecc96995ecc96995ecc96995ecc96995ecc96995ecc96995ecc9"
-    },
-    {
-      "id": "WebtoonDE",
-      "name": "WebtoonDE",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "de-DE"
-      ],
-      "path": "WebtoonDE",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "24ac64a424ac64a424ac64a424ac64a424ac64a424ac64a424ac64a424ac64a4"
-    },
-    {
-      "id": "WebtoonEN",
-      "name": "WebtoonEN",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "en-US"
-      ],
-      "path": "WebtoonEN",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "6171ecb26171ecb26171ecb26171ecb26171ecb26171ecb26171ecb26171ecb2"
-    },
-    {
-      "id": "WebtoonES",
-      "name": "WebtoonES",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "es-ES"
-      ],
-      "path": "WebtoonES",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "510d36fa510d36fa510d36fa510d36fa510d36fa510d36fa510d36fa510d36fa"
-    },
-    {
-      "id": "WebtoonFR",
-      "name": "WebtoonFR",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "fr-FR"
-      ],
-      "path": "WebtoonFR",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "194dc301194dc301194dc301194dc301194dc301194dc301194dc301194dc301"
-    },
-    {
-      "id": "WebtoonID",
-      "name": "WebtoonID",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "id-ID"
-      ],
-      "path": "WebtoonID",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "4ac488854ac488854ac488854ac488854ac488854ac488854ac488854ac48885"
-    },
-    {
-      "id": "WebtoonTH",
-      "name": "WebtoonTH",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "th-TH"
-      ],
-      "path": "WebtoonTH",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "49aad2e449aad2e449aad2e449aad2e449aad2e449aad2e449aad2e449aad2e4"
-    },
-    {
-      "id": "WebtoonZH",
-      "name": "WebtoonZH",
-      "version": "1.0.0",
-      "thumbnail": "Webtoon.png",
-      "rating": 0,
-      "supportedLanguages": [
-        "zh-tw"
-      ],
-      "path": "WebtoonZH",
-      "environment": "source",
-      "intents": 2097165,
-      "hash": "1c6ef0191c6ef0191c6ef0191c6ef0191c6ef0191c6ef0191c6ef0191c6ef019"
+      "hash": "103c3714103c3714103c3714103c3714103c3714103c3714103c3714103c3714"
     },
     {
       "id": "WebtoonXYZ",
@@ -1085,7 +985,7 @@
       "path": "WebtoonXYZ",
       "environment": "source",
       "intents": 2100237,
-      "hash": "445fb57e445fb57e445fb57e445fb57e445fb57e445fb57e445fb57e445fb57e"
+      "hash": "41ce29c541ce29c541ce29c541ce29c541ce29c541ce29c541ce29c541ce29c5"
     },
     {
       "id": "ZinManga",
@@ -1097,7 +997,7 @@
       "path": "ZinManga",
       "environment": "source",
       "intents": 2100237,
-      "hash": "23a7b54423a7b54423a7b54423a7b54423a7b54423a7b54423a7b54423a7b544"
+      "hash": "562a67b4562a67b4562a67b4562a67b4562a67b4562a67b4562a67b4562a67b4"
     },
     {
       "id": "eDoujin",
@@ -1108,7 +1008,7 @@
       "path": "eDoujin",
       "environment": "source",
       "intents": 2100237,
-      "hash": "64566a8664566a8664566a8664566a8664566a8664566a8664566a8664566a86"
+      "hash": "157bb6ee157bb6ee157bb6ee157bb6ee157bb6ee157bb6ee157bb6ee157bb6ee"
     },
     {
       "id": "xCalibrScans",
@@ -1120,7 +1020,7 @@
       "path": "xCalibrScans",
       "environment": "source",
       "intents": 2100237,
-      "hash": "0e7e3c1e0e7e3c1e0e7e3c1e0e7e3c1e0e7e3c1e0e7e3c1e0e7e3c1e0e7e3c1e"
+      "hash": "6b53e1906b53e1906b53e1906b53e1906b53e1906b53e1906b53e1906b53e190"
     }
   ]
 }

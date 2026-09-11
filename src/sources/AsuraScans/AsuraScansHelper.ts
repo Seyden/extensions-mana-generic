@@ -1,30 +1,9 @@
 import {
     NetworkRequest,
     NetworkResponse,
-    PageSection,
-    SectionStyle,
     Tag,
     Option
 } from '@mana-app/types'
-import { load } from 'cheerio'
-
-export interface HomeSectionData {
-    componentName: string
-    section: PageSection
-    enabled: boolean
-    sortIndex: number
-}
-
-
-export function createHomeSection(id: string, title: string, subtitle: string | undefined = undefined, containsMoreItems: boolean = true, style: SectionStyle = SectionStyle.SimpleSingleRow): PageSection {
-    return {
-        id,
-        title,
-        subtitle,
-        style,
-        viewMoreLink: containsMoreItems ? { request: { page: 1, listId: id } } : undefined,
-    }
-}
 
 export function getSelectValue(filterValue: Option | undefined): any {
     return filterValue?.id?.replace(' ', '+')
@@ -65,11 +44,12 @@ export async function loadRequestData(client: NetworkClient, url: string, method
 }
 
 export async function loadJsonData<T extends object>(client: NetworkClient, url: string, method: string = 'GET'): Promise<T> {
-    return JSON.parse(await loadRequestData(client, url, method)) as T
-}
-
-export async function loadCheerioData(client: NetworkClient, url: string, method: string = 'GET'): Promise<CheerioStatic> {
-    return load(await loadRequestData(client, url, method), { _useHtmlParser2: true })
+    const data = await loadRequestData(client, url, method)
+    try {
+        return JSON.parse(data) as T
+    } catch {
+        throw new Error(`Invalid AsuraScans JSON response: ${url}`)
+    }
 }
 
 export function checkResponseErrors(response: NetworkResponse): void {

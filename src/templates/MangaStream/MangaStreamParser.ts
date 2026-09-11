@@ -110,7 +110,7 @@ export class MangaStreamParser {
             langCode = 'ko_KR'
         }
 
-        for (const chapter of $('li', 'div#chapterlist').toArray()) {
+        for (const chapter of $('li', 'div#chapterlist').toArray().reverse()) {
             const title = $('span.chapternum', chapter).text().trim()
             const link = this.idCleaner($('a', chapter).attr('href') ?? '')
             const date = convertDate($('span.chapterdate', chapter).text().trim(), source)

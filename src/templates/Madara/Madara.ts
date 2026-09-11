@@ -19,8 +19,8 @@ import {
     SectionStyle,
     Tag,
     UIToggle,
-    SearchTagsSection,
-    SearchMultiPicker,
+    SearchListSection,
+    SearchMultiPickerSheet,
     SearchForm,
     Option
 } from '@mana-app/types'
@@ -259,13 +259,12 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     async getSearchForm(): Promise<SearchForm> {
         return {
             sections: [
-                SearchTagsSection({
-                    header: 'Genres',
-                    field: SearchMultiPicker({
+                SearchListSection({
+                    children: [SearchMultiPickerSheet({
                         id: 'genres',
                         title: 'Genres',
                         options: (await this.getGenreTags())
-                    })
+                    })]
                 })
             ]
         };

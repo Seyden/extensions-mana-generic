@@ -10,28 +10,19 @@ import {
     PublicationStatus,
     SearchForm,
     SearchListSection,
-    SearchMultiPicker,
+    SearchMultiPickerSheet,
     SearchPicker,
     SearchSortSection,
-    SearchTagsSection,
-    SectionStyle,
     Tag,
     staff,
     StaffSection,
     ReadingMode,
-    Pair,
-    SearchSortStyle,
     ContentRating
 } from '@mana-app/types'
 
 import {
-    HomeSectionData
-} from './AsuraScansHelper'
-
-import {
     ChapterDetail,
     Genre,
-    HomeFeedChapter,
     SeriesChapter,
     SeriesDetail,
     SeriesSearchItem,
@@ -40,7 +31,7 @@ import {
     typeOptions
 } from './AsuraScansInterfaces'
 
-import { parseAstroIsland } from './AstroIslandProps'
+import moment from 'moment'
 import { decode as decodeHTMLEntity } from 'html-entities'
 import { load } from 'cheerio'
 
@@ -197,13 +188,12 @@ export class AsuraScansParser{
 
         return {
             sections: [
-                SearchTagsSection({
-                    header: 'Genres',
-                    field: SearchMultiPicker({
+                SearchListSection({
+                    children: [SearchMultiPickerSheet({
                         id: 'genres',
                         title: 'Genres',
                         options: genres.map((g) => ({ id: `${g.id}`, title: g.name }))
-                    })
+                    })]
                 }),
                 SearchListSection({
                     header: 'Filters',
@@ -225,98 +215,51 @@ export class AsuraScansParser{
                         })
                     ]
                 }),
-                SearchSortSection({
-                    header: 'Sort',
-                    style: SearchSortStyle.PICKER
-                })
+                SearchSortSection({ header: 'Sort' })
             ]
         }
     }
 
-    parseSearchResults(items: SeriesSearchItem[]): Highlight[] {
-        return items.map((item) => ({
-            id: item.slug,
-            cover: item.cover,
-            title: item.title,
-            webUrl: item.public_url
+    parseSeriesItems(items: SeriesSearchItem[], baseUrl: string, fallbackImage: string, detailed = false): Highlight[] {
+        return items.map(item => {
+            const chapters = item.latest_chapters ?? []
+            const latest = chapters[0]
+            return {
+                ...this.highlight(item, item.cover, baseUrl, fallbackImage),
+                subtitle: !detailed && latest ? `Chapter ${latest.number}${latest.is_premium ? ' 🔒' : ''}` : undefined,
+                ...(detailed ? { info: chapters.map(chapter => {
+                    const date = moment(chapter.published_at)
+                    return {
+                        key: `Chapter ${chapter.number}${chapter.is_premium ? ' 🔒' : ''}`,
+                        value: chapter.published_at && date.isValid() ? date.fromNow() : ''
+                    }
+                }) } : {})
+            }
+        })
+    }
+
+    parseTrendingItems(items: TrendingItem[], baseUrl: string, fallbackImage: string): Highlight[] {
+        return items.map(item => ({
+            ...this.highlight(item, item.cover_url, baseUrl, fallbackImage),
+            subtitle: item.latest_chapter_number != null ? `Chapter ${item.latest_chapter_number}` : undefined
         }))
     }
 
-    async parseHomeSection($: CheerioStatic, section: HomeSectionData, source: any): Promise<Highlight[]> {
-        const props = parseAstroIsland<{ items?: TrendingItem[]; chapters?: HomeFeedChapter[] }>(
-            $, section.componentName, `parse home section "${section.section.title}"`)
-
-        if (props.items) {
-            return props.items.map((item) => ({
-                id: item.slug,
-                cover: item.cover_url || source.fallbackImage,
-                title: item.title,
-                subtitle: `Chapter ${item.chapter_count}`,
-                webUrl: item.public_url
-            }))
+    private highlight(
+        item: Pick<SeriesSearchItem, 'slug' | 'title' | 'public_url' | 'rating'>,
+        cover: string,
+        baseUrl: string,
+        fallbackImage: string
+    ): Highlight {
+        return {
+            id: item.slug,
+            title: decodeHTMLEntity(item.title),
+            cover: cover || fallbackImage,
+            webUrl: item.public_url ? new URL(item.public_url, baseUrl).href : undefined,
+            ...(typeof item.rating === 'number' && Number.isFinite(item.rating) && item.rating > 0
+                ? { badge: { text: `★ ${item.rating.toFixed(1)}` } }
+                : {})
         }
-
-        const isDetailed = section.section.style === SectionStyle.DetailedVerticalListGrouped
-        const seen = new Map<string, Highlight>()
-
-        for (const chapter of props.chapters ?? []) {
-            const entry: Pair = { key: `Chapter ${chapter.number}`, value: chapter.time_ago ?? '' }
-            const existing = seen.get(chapter.comic_slug)
-
-            if (!existing) {
-                seen.set(chapter.comic_slug, {
-                    id: chapter.comic_slug,
-                    cover: chapter.comic_cover || source.fallbackImage,
-                    title: chapter.comic_name,
-                    webUrl: chapter.comic_public_url,
-                    ...(isDetailed
-                        ? { info: [entry] as any }
-                        : { subtitle: entry.key })
-                })
-            } else if (isDetailed) {
-                (existing.info as any as [Pair]).push(entry)
-            }
-        }
-
-        return [...seen.values()]
-    }
-
-    protected getImageSrc(imageObj: Cheerio | undefined): string {
-        let image: string | undefined
-        const src = imageObj?.attr('src')
-        const dataLazy = imageObj?.attr('data-lazy-src')
-        const srcset = imageObj?.attr('srcset')
-        const dataSRC = imageObj?.attr('data-src')
-
-        if (typeof src != 'undefined' && !src?.startsWith('data')) {
-            image = src
-        } else if (typeof dataLazy != 'undefined' && !dataLazy?.startsWith('data')) {
-            image = dataLazy
-        } else if (typeof srcset != 'undefined' && !srcset?.startsWith('data')) {
-            image = srcset?.split(' ')[0] ?? ''
-        } else if (typeof dataSRC != 'undefined' && !dataSRC?.startsWith('data')) {
-            image = dataSRC
-        } else {
-            image = 'https://i.imgur.com/GYUxEX8.png'
-        }
-
-        image = image?.split('?resize')[0] ?? ''
-
-        return decodeURI(decodeHTMLEntity(image?.trim() ?? ''))
-    }
-
-    protected idCleaner(str: string): string {
-        let cleanId: string | null = str
-        cleanId = cleanId.replace(/\/$/, '')
-        cleanId = cleanId.split('/').pop() ?? null
-        // Remove randomised slug part
-        cleanId = cleanId?.substring(0, cleanId?.lastIndexOf('-')) ?? null
-
-        if (!cleanId) {
-            throw new Error(`Unable to parse id for ${str}`)
-        }
-
-        return cleanId
     }
 
 }

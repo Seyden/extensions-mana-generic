@@ -20,8 +20,8 @@ import {
     SourceInfo,
     SectionStyle,
     SearchForm,
-    SearchTagsSection,
-    SearchMultiPicker,
+    SearchListSection,
+    SearchMultiPickerSheet,
 } from '@mana-app/types'
 
 import { MangaStreamParser } from './MangaStreamParser'
@@ -337,13 +337,12 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
 
         return {
             sections: [
-                SearchTagsSection({
-                    header: 'Genres',
-                    field: SearchMultiPicker({
+                SearchListSection({
+                    children: [SearchMultiPickerSheet({
                         id: 'genres',
                         title: 'Genres',
                         options: tags
-                    })
+                    })]
                 })
             ]
         };

@@ -3,15 +3,14 @@ import {
     SectionStyle,
     SourceInfo
 } from '@mana-app/types'
-import { createHomeSection, HomeSectionData } from './AsuraScansHelper'
-import { StatusTypes } from './AsuraScansInterfaces'
+import { HomeSectionDefinition, StatusTypes } from './AsuraScansInterfaces'
 
 export const ASURASCANS_DOMAIN = 'https://asurascans.com'
 export const ASURASCANS_API_DOMAIN = 'https://api.asurascans.com'
 
 export const SOURCE_INFO: SourceInfo = {
     id: 'AsuraScans',
-    version: "1.0.0",
+    version: "1.0.1",
     name: 'AsuraScans',
     thumbnail: 'AsuraScans.png',
     rating: CatalogRating.MIXED,
@@ -44,23 +43,10 @@ export const STATUS_TYPES: StatusTypes = {
     DROPPED: 'DROPPED'
 }
 
-export const HOME_SECTIONS: Record<'trending_today' | 'latest_update' | 'latest_update2', HomeSectionData> = {
-    'trending_today': {
-        section: createHomeSection('trending_today', 'Trending Today', undefined, false, SectionStyle.SimpleHeroPaged),
-        enabled: true,
-        sortIndex: 10,
-        componentName: 'Trending',
-    },
-    'latest_update': {
-        section: createHomeSection('latest_update', 'Latest Updates', "Your daily dose of the latest updates", true, SectionStyle.DetailedVerticalListGrouped),
-        enabled: true,
-        sortIndex: 20,
-        componentName: 'LatestUpdates',
-    },
-    'latest_update2': {
-        section: createHomeSection('latest_update2', 'Latest Updates 2', "Your daily dose of the latest updates", true, SectionStyle.SimpleTripleRow),
-        enabled: true,
-        sortIndex: 30,
-        componentName: 'LatestUpdates',
-    },
-}
+export const HOME_SECTIONS: readonly HomeSectionDefinition[] = [
+    { id: 'trending_today', title: 'Trending', style: SectionStyle.SimpleHeroPaged, kind: 'trending', period: 'trending' },
+    { id: 'latest_update', title: 'Latest Updates', style: SectionStyle.DetailedVerticalListGrouped, kind: 'latest' },
+    { id: 'weekly', title: 'Weekly', style: SectionStyle.SimpleSingleRow, kind: 'trending', period: 'week' },
+    { id: 'monthly', title: 'Monthly', style: SectionStyle.SimpleSingleRow, kind: 'trending', period: 'month' },
+    { id: 'all_time', title: 'All Time', style: SectionStyle.SimpleSingleRow, kind: 'trending', period: 'all' }
+]

@@ -1,4 +1,4 @@
-import { Option } from "@mana-app/types";
+import { Option, SectionStyle } from "@mana-app/types";
 
 export interface StatusTypes {
     ONGOING: string;
@@ -93,17 +93,18 @@ export interface SeriesSearchItem {
     cover: string
     status: string
     type: string
-    rating: number
+    rating?: number | null
     chapter_count: number
     public_url: string
     latest_chapters?: SeriesChapter[]
 }
 
-export interface SeriesSearchResponse {
-    data: SeriesSearchItem[]
-    meta: {
-        total: number
-        per_page: number
+export interface ApiCollection<T> {
+    data: T[]
+    meta?: {
+        total?: number
+        per_page?: number
+        has_more?: boolean
     }
 }
 
@@ -114,23 +115,16 @@ export interface TrendingItem {
     cover_url: string
     status: string
     type: string
-    rating: number
+    rating?: number | null
     chapter_count: number
     public_url: string
+    latest_chapter_number?: number | null
 }
 
-export interface HomeFeedChapter {
-    id: number
-    name: string
-    number: number
-    title?: string | null
-    published_at: string
-    time_ago?: string
-    comic_name: string
-    comic_slug: string
-    comic_public_url: string
-    comic_cover: string
-    type?: string
-    is_premium?: boolean
-    early_access_until?: string | null
-}
+export type TrendingPeriod = 'trending' | 'week' | 'month' | 'all'
+
+export type HomeSectionDefinition = {
+    id: string
+    title: string
+    style: SectionStyle
+} & ({ kind: 'latest' } | { kind: 'trending'; period: TrendingPeriod })

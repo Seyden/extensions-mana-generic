@@ -1,11 +1,10 @@
 import { PagedSearchResult, SearchForm, SearchRequest, SortOption } from '@mana-app/types'
-import { FilterProps, GenresResponse, orderOptions, SeriesSearchResponse } from './AsuraScansInterfaces'
-import { getSelectValue, loadJsonData } from './AsuraScansHelper'
+import { FilterProps, GenresResponse, orderOptions } from './AsuraScansInterfaces'
+import { loadJsonData } from './AsuraScansHelper'
 import { ASURASCANS_API_DOMAIN } from './AsuraScansInfo'
 import { AsuraScansParser } from './AsuraScansParser'
-import { URLBuilder } from './UrlBuilder'
-
-const LIMIT = 20
+import { AsuraScansApi, SERIES_PAGE_LIMIT } from './AsuraScansApi'
+export { constructSearchUrl } from './AsuraScansApi'
 
 export async function getSortOptions(): Promise<SortOption[]> {
     return orderOptions.map((option) => ({
@@ -21,39 +20,17 @@ export async function getSearchForm(client: NetworkClient, parser: AsuraScansPar
     return parser.parseTags(genres ?? [])
 }
 
-export async function search(client: NetworkClient, parser: AsuraScansParser, searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
+export async function search(api: AsuraScansApi, parser: AsuraScansParser, searchRequest: SearchRequest<FilterProps>, baseUrl: string, fallbackImage: string): Promise<PagedSearchResult> {
     const page: number = searchRequest?.page ?? 1
-    const offset = (page - 1) * LIMIT
-
-    const url = constructSearchUrl(offset, searchRequest)
-    const { data, meta } = await loadJsonData<SeriesSearchResponse>(client, url)
+    const offset = (page - 1) * SERIES_PAGE_LIMIT
+    const { data, meta } = await api.getSeriesPage(searchRequest)
+    const hasMore = meta?.has_more ?? (meta?.total != null
+        ? offset + data.length < meta.total
+        : data.length >= SERIES_PAGE_LIMIT)
 
     return {
-        results: parser.parseSearchResults(data ?? []),
-        isLastPage: offset + LIMIT >= (meta?.total ?? 0)
+        results: parser.parseSeriesItems(data, baseUrl, fallbackImage),
+        isLastPage: !hasMore,
+        totalResultCount: meta?.total
     }
-}
-
-export function constructSearchUrl(offset: number, query: SearchRequest<FilterProps>): string {
-    let urlBuilder = new URLBuilder(ASURASCANS_API_DOMAIN)
-        .addPathComponent('api/series')
-        .addQueryParameter('limit', LIMIT.toString())
-        .addQueryParameter('offset', offset.toString())
-
-    if (query?.query) {
-        urlBuilder = urlBuilder.addQueryParameter('search', encodeURIComponent(query.query))
-    }
-
-    const sort = query?.sort?.id
-    const genres = query.filters?.genres?.map((g) => g.title.toLowerCase())
-
-    urlBuilder = urlBuilder
-        .addQueryParameter('status', getSelectValue(query?.filters?.status))
-        .addQueryParameter('type', getSelectValue(query?.filters?.type))
-        .addQueryParameter('sort', sort ?? 'latest')
-        .addQueryParameter('order', query?.sort?.ascending ? 'asc' : 'desc')
-        .addQueryParameter('genres', genres)
-        .addQueryParameter('min_chapters', getSelectValue(query?.filters?.chapters))
-
-    return urlBuilder.buildUrl({ addTrailingSlash: false, includeUndefinedParameters: false })
 }

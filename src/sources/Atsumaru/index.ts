@@ -48,7 +48,7 @@ export class Target implements
     ImageRequestHandler {
     readonly info: SourceInfo = {
         id: 'Atsumaru',
-        version: '1.0.1',
+        version: '1.0.2',
         name: 'Atsumaru',
         description: 'Read manga, manhwa, manhua, and comics from Atsumaru.',
         thumbnail: ATSUMARU_ICON_URL,

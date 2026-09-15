@@ -16,7 +16,7 @@ import {
     tags as tagInfo
 } from '@mana-app/types'
 import {
-    ATSUMARU_BASE_URL,
+    ATSUMARU_CDN_URL,
     ATSUMARU_ICON_URL,
     ATSUMARU_LANGUAGE
 } from './AtsumaruApi'
@@ -54,12 +54,17 @@ export function normalizeAtsumaruAssetUrl(value: string | null | undefined): str
     if (!trimmed) return undefined
 
     if (/^https?:?\/\//i.test(trimmed)) {
-        return trimmed.replace(/^https?:?\/\//i, 'https://')
+        return trimmed
+            .replace(/^https?:?\/\//i, 'https://')
+            .replace(/^https:\/\/atsu\.moe(?=\/static\/)/i, ATSUMARU_CDN_URL)
     }
-    if (trimmed.startsWith('//')) return `https:${trimmed}`
+    if (trimmed.startsWith('//')) {
+        return `https:${trimmed}`
+            .replace(/^https:\/\/atsu\.moe(?=\/static\/)/i, ATSUMARU_CDN_URL)
+    }
 
     const path = trimmed.replace(/^\/+/, '').replace(/^static\//, '')
-    return `${ATSUMARU_BASE_URL}/static/${path}`
+    return `${ATSUMARU_CDN_URL}/static/${path}`
 }
 
 function imageCandidates(manga: AtsumaruManga): string[] {

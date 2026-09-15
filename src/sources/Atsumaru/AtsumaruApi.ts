@@ -13,6 +13,7 @@ import {
 const simpleUrl = require('simple-url')
 
 export const ATSUMARU_BASE_URL = 'https://atsu.moe'
+export const ATSUMARU_CDN_URL = 'https://cdn.atsu.moe'
 export const ATSUMARU_LANGUAGE = 'en_US'
 export const ATSUMARU_ICON_URL =
     `${ATSUMARU_BASE_URL}/favicon/apple-touch-icon-180x180.png`

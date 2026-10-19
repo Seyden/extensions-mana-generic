@@ -1,4 +1,7 @@
 import {
+    HttpMethod,
+    Body,
+    CloudflareError,
     Chapter,
     ChapterData,
     Content,
@@ -6,10 +9,10 @@ import {
     SearchRequest,
     Form,
     Highlight,
-    ImageRequestHandler,
-    NetworkClientBuilder,
-    NetworkRequest,
-    NetworkResponse,
+    CoverRequestHandler,
+    PageRequestHandler,
+    HttpClient,
+    HttpResponse,
     PagedSearchResult,
     PageLink,
     PageLinkResolver,
@@ -22,9 +25,9 @@ import {
     SearchListSection,
     SearchMultiPickerSheet,
     SearchForm,
-    Option
+    Option,
+    ImageRequest,
 } from '@mana-app/types'
-
 import { Parser } from './MadaraParser'
 import { URLBuilder } from './MadaraHelper'
 import { load } from 'cheerio'
@@ -34,7 +37,7 @@ export const getExportVersion = (EXTENSION_VERSION: string): string => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.')
 }
 
-export abstract class Madara implements ContentSource, PageLinkResolver, ImageRequestHandler {
+export abstract class Madara implements ContentSource, PageLinkResolver, CoverRequestHandler, PageRequestHandler {
 
     abstract info: SourceInfo
 
@@ -44,27 +47,26 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     requestsPerSecond = 5
     requestTimeout = 20000
 
-    client: NetworkClient = new NetworkClientBuilder()
-            .setRateLimit(this.requestsPerSecond, 1)
-            .setTimeout(this.requestTimeout)
-            .addRequestInterceptor(async (request) => {
-                return {
-                    ...request,
-                    headers: {
-                        ...(request.headers ?? {}),
-                        ...{
-                            'referer': `${this.baseUrl}/`,
-                            'origin': `${this.baseUrl}/`,
-                            ...(request.url.includes('wordpress.com') && { 'Accept': 'image/avif,image/webp,*/*' }) // Used for images hosted on Wordpress blogs
-                        }
-                    },
-                    cookies: [
-                        { name: "wpmanga-adault", domain: this.baseUrl, value: "1" },
-                        { name: "toonily-mature", domain: this.baseUrl, value: "1" },
-                    ],
-                }
-            })
-            .build()
+    client: HttpClient = new HttpClient()
+        .setRateLimit(this.requestsPerSecond, 1_000)
+        .setTimeoutMs(this.requestTimeout)
+        .addRequestInterceptor((request) => {
+            request.headers.referer = `${this.baseUrl}/`
+            request.headers.origin = `${this.baseUrl}/`
+
+            if (request.url.includes('wordpress.com')) {
+                request.headers.accept = 'image/avif,image/webp,*/*' // Used for images hosted on Wordpress blogs
+            }
+
+            // Keep maturity preferences scoped to this site's own host.
+            if (new URL(request.url).hostname === new URL(this.baseUrl).hostname) {
+                request.headers.cookie = [request.headers.cookie, 'wpmanga-adault=1; toonily-mature=1']
+                    .filter(Boolean)
+                    .join('; ')
+            }
+
+            return request
+        })
 
     async getPreferenceMenu(): Promise<Form> {
         return {
@@ -168,13 +170,13 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     async getContent(mangaId: string): Promise<Content> {
         const response = await this.client.get(this.usePostIds ? `${this.baseUrl}/?p=${mangaId}/` : `${this.baseUrl}/${this.directoryPath}/${mangaId}/`)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         return this.parser.parseMangaDetails($, mangaId, this)
     }
 
     async getChapters(mangaId: string): Promise<Chapter[]> {
-        let requestConfig: NetworkRequest
+        let requestConfig: Parameters<HttpClient['request']>[0]
         let path = this.directoryPath
         let slug = mangaId
 
@@ -188,34 +190,25 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case 0:
                 requestConfig = {
                     url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
-                    method: 'POST',
-                    headers: {
-                        'content-type': 'application/x-www-form-urlencoded'
-                    },
-                    body: {
+                    method: HttpMethod.Post,
+                    body: Body.form({
                         'action': 'manga_get_chapters',
                         'manga': this.usePostIds ? mangaId : await this.convertSlugToPostId(mangaId, this.directoryPath)
-                    }
+                    })
                 }
                 break
 
             case 1:
                 requestConfig = {
                     url: `${this.baseUrl}/${path}/${slug}/ajax/chapters`,
-                    method: 'POST',
-                    headers: {
-                        'content-type': 'application/x-www-form-urlencoded'
-                    }
+                    method: HttpMethod.Post
                 }
                 break
 
             case 2:
                 requestConfig = {
                     url: `${this.baseUrl}/${path}/${slug}`,
-                    method: 'POST',
-                    headers: {
-                        'content-type': 'application/x-www-form-urlencoded'
-                    }
+                    method: HttpMethod.Post
                 }
                 break
 
@@ -223,9 +216,13 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 throw new Error('Invalid chapter endpoint!')
         }
 
-        const response = await this.client.request(requestConfig)
+        const response = await this.client.request(requestConfig, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         return this.parser.parseChapterList($, mangaId, this)
     }
@@ -242,12 +239,12 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
 
         const request = {
             url: url,
-            method: 'GET'
+            method: HttpMethod.Get
         }
 
         const response = await this.client.request(request)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         if (this.hasProtectedChapters) {
             return this.parser.parseProtectedChapterDetails($, mangaId, chapterId, this.protectedChapterDataSelector, this)
@@ -273,7 +270,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     async getGenreTags(): Promise<Tag[]> {
         const response = await this.client.get(this.hasAdvancedSearchPage ? `${this.baseUrl}/?s=the&post_type=wp-manga` : `${this.baseUrl}/`)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         return this.parser.parseTags($, this.hasAdvancedSearchPage)
     }
@@ -289,7 +286,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         const request = this.constructSearchRequest(page, searchRequest)
         const response = await this.client.request(request)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
         const results = await this.parser.parseSearchResults($, this)
 
         const manga: Highlight[] = []
@@ -394,7 +391,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             promises.push(this.client.request(section.request)
                               .then(async response => {
                                   this.checkResponseError(response)
-                                  const $ = load(response.data as string)
+                                  const $ = load(await response.text())
                                   section.section.items = await this.parser.parseHomeSection($, this)
                                   return section.section
                               }))
@@ -419,7 +416,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case '0': {
                 var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_latest_update'))
                 this.checkResponseError(response)
-                const $ = load(response.data as string)
+                const $ = load(await response.text())
                 const items: Highlight[] = await this.parser.parseHomeSection($, this)
                 return {
                     items: items,
@@ -428,7 +425,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case '1': {
                 var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_week_views_value'))
                 this.checkResponseError(response)
-                const $ = load(response.data as string)
+                const $ = load(await response.text())
                 const items: Highlight[] = await this.parser.parseHomeSection($, this)
                 return {
                     items: items,
@@ -437,7 +434,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case '2': {
                 var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_views'))
                 this.checkResponseError(response)
-                const $ = load(response.data as string)
+                const $ = load(await response.text())
                 const items: Highlight[] = await this.parser.parseHomeSection($, this)
                 return {
                     items: items,
@@ -446,7 +443,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case '3': {
                 var response = await this.client.request(this.constructAjaxHomepageRequest(0, 10, '_wp_manga_status', 'end'))
                 this.checkResponseError(response)
-                const $ = load(response.data as string)
+                const $ = load(await response.text())
                 const items: Highlight[] = await this.parser.parseHomeSection($, this)
                 return {
                     items: items,
@@ -482,7 +479,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         const request = this.constructAjaxHomepageRequest(page, 50, sortBy[0], sortBy[1])
         const response = await this.client.request(request)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
         const items: Highlight[] = await this.parser.parseHomeSection($, this)
 
         return {
@@ -504,19 +501,16 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 .addQueryParameter('post_type', 'wp-manga')
                 .addQueryParameter('genre', genres?.map((x: Option) => x.id))
                 .buildUrl({ addTrailingSlash: true, includeUndefinedParameters: false }),
-            method: 'GET'
+            method: HttpMethod.Get
         }
     }
 
     constructAjaxHomepageRequest(page: number, postsPerPage: number, meta_key: string, meta_value?: string): any {
         console.log(`constructAjaxHomepageRequest`)
-        const request: NetworkRequest = {
+        const request: Parameters<HttpClient['request']>[0] = {
             url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
-            method: 'POST',
-            headers: {
-                'content-type': 'application/x-www-form-urlencoded'
-            },
-            body: {
+            method: HttpMethod.Post,
+            body: Body.form({
                 'action': 'madara_load_more',
                 'template': 'madara-core/content/content-archive',
                 'page': page,
@@ -527,9 +521,8 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
                 'vars[post_type]': 'wp-manga',
                 'vars[order]': 'desc',
                 'vars[meta_key]': meta_key,
-                'vars[meta_value]': meta_value
-            },
-            validateStatus: s => s == 404 || s == 403 || s == 503 || (s >= 200 && s < 300)
+                ...(meta_value === undefined ? {} : { 'vars[meta_value]': meta_value })
+            })
         }
         return request
     }
@@ -556,11 +549,11 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     async convertPostIdToSlug(postId: number) {
         const request = {
             url: `${this.baseUrl}/?p=${postId}`,
-            method: 'GET'
+            method: HttpMethod.Get
         }
 
         const response = await this.client.request(request)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         let parseSlug: any
         // Step 1: Try to get slug from og-url
@@ -588,13 +581,13 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
     async convertSlugToPostId(slug: string, path: string): Promise<string> { // Credit to the MadaraDex team :-D
         const headRequest = {
             url: `${this.baseUrl}/${path}/${slug}`,
-            method: 'HEAD'
+            method: HttpMethod.Head
         }
         const headResponse = await this.client.request(headRequest)
 
         let postId: any
 
-        const postIdRegex = headResponse?.headers['Link']?.match(/\?p=(\d+)/)
+        const postIdRegex = headResponse?.headers.link?.match(/\?p=(\d+)/)
         if (postIdRegex && postIdRegex[1]) postId = postIdRegex[1]
         if (postId || !isNaN(Number(postId))) {
             return postId?.toString()
@@ -604,11 +597,11 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
 
         const request = {
             url: `${this.baseUrl}/${path}/${slug}`,
-            method: 'GET'
+            method: HttpMethod.Get
         }
 
         const response = await this.client.request(request)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         // Step 1: Try to get postId from shortlink
         postId = Number($('link[rel="shortlink"]')?.attr('href')?.split('/?p=')[1])
@@ -634,7 +627,7 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
         return postId.toString()
     }
 
-    checkResponseError(response: NetworkResponse): void {
+    checkResponseError(response: HttpResponse): void {
         const status = response.status
         console.log(`checkResponseError: ${status}`)
         switch (status) {
@@ -644,16 +637,14 @@ export abstract class Madara implements ContentSource, PageLinkResolver, ImageRe
             case 404:
                 throw new Error(`The requested page ${response.request.url} was not found!`)
         }
+        response.requireOk()
     }
 
-    async willRequestImage(url: string): Promise<NetworkRequest> {
-        return {
-            url,
-            headers: {
-                'referer': `${this.baseUrl}/`,
-                'origin': `${this.baseUrl}/`,
-                ...(url.includes('wordpress.com') && { 'Accept': 'image/avif,image/webp,*/*' }) // Used for images hosted on Wordpress blogs
-            }
-        }
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.client
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.client
     }
 }

@@ -1,6 +1,5 @@
 import {
     Content,
-    Property,
     PublicationStatus,
     Tag
 } from '@mana-app/types'
@@ -54,17 +53,10 @@ export class KnightNoScanlationParser extends Parser {
             genres.push({ title: label, id: id })
         }
 
-        const properties: Property[] = [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: genres
-            }
-        ]
 
         return {
             title: titles[0]!,
-            properties,
+            tags: genres,
             status,
             additionalTitles: titles,
             summary: description,

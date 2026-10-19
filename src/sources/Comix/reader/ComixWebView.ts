@@ -1,8 +1,8 @@
 import {
-    NetworkClientBuilder,
-    NetworkRequest,
+    CloudflareError,
+    HttpClient,
     WebViewPageFactory,
-    WebViewPageInstance
+    WebViewPageInstance,
 } from '@mana-app/types'
 import {
     ComixChapter,
@@ -38,7 +38,7 @@ interface ComixReaderPage {
 }
 
 interface ComixBundlePageSnapshot {
-    state: 'main' | 'cloudflare' | 'waiting'
+    state: 'main' | 'cloudflare' | 'blocked' | 'waiting'
 }
 
 function delay(ms: number): Promise<void> {
@@ -84,7 +84,10 @@ export async function waitForComixMainBundle(
                 const hasMainBundle = Boolean(document.querySelector(
                     'script[type="module"][src*="/dist/main-"]'
                 ))
-                if (document.title === 'Just a moment...') {
+                const isBlocked = Boolean(document.querySelector('#cf-error-details')) &&
+                    /sorry, you have been blocked/i.test(document.body?.textContent ?? '')
+                if (document.title === 'Just a moment...' ||
+                    /Attention Required!.*Cloudflare/i.test(document.title)) {
                     markers.push('title')
                 }
                 if (document.querySelector('#challenge-error-text')) {
@@ -103,7 +106,9 @@ export async function waitForComixMainBundle(
                 return {
                     state: hasMainBundle
                         ? 'main'
-                        : markers.length > 0
+                        : isBlocked
+                            ? 'blocked'
+                            : markers.length > 0
                             ? 'cloudflare'
                             : 'waiting'
                 }
@@ -113,6 +118,9 @@ export async function waitForComixMainBundle(
         }
 
         if (snapshot?.state === 'main') return
+        if (snapshot?.state === 'blocked') {
+            throw new Error('Comix access blocked by Cloudflare: the site returned “Sorry, you have been blocked”, not its application page. Open comix.to to check access.')
+        }
         if (snapshot?.state === 'cloudflare') {
             throw new CloudflareError(resolutionUrl)
         }
@@ -144,12 +152,12 @@ export class ComixWebViewClient {
     private readonly bundleTimeoutMs: number
     private readonly pollIntervalMs: number
     private readonly pageTimeoutSeconds: number
-    private binaryClient?: NetworkClient
+    private binaryClient?: HttpClient
 
     constructor(
         factory?: WebViewPageFactory,
         options: ComixWebViewClientOptions = {},
-        binaryClient?: NetworkClient
+        binaryClient?: HttpClient
     ) {
         this.factory = factory
         this.bundleTimeoutMs = options.bundleTimeoutMs ?? 12_000
@@ -194,17 +202,16 @@ export class ComixWebViewClient {
         return this.execute<ComixHomeData>('/', 'home', { params })
     }
 
-    private getBinaryClient(): NetworkClient {
+    private getBinaryClient(): HttpClient {
         if (!this.binaryClient) {
-            this.binaryClient = new NetworkClientBuilder()
-                .setRateLimit(5, 1)
-                .setTimeout(30_000)
+            this.binaryClient = new HttpClient()
+                .setRateLimit(5, 1_000)
+                .setTimeoutMs(30_000)
                 .addHeader('Referer', `${COMIX_DOMAIN}/`)
                 .addHeader(
                     'Accept',
                     'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5'
                 )
-                .build()
         }
         return this.binaryClient
     }
@@ -219,21 +226,13 @@ export class ComixWebViewClient {
             Pragma: 'no-cache'
         }
 
-        const request: NetworkRequest = {
-            url,
-            method: 'GET',
-            responseEncoding: 'base64',
-            headers,
-            validateStatus: () => true
+        const response = await this.getBinaryClient().get(url, { headers })
+        if (!response.ok) {
+            throw new Error(`CDN returned ${response.status} for ${url}`)
         }
-        const response = await this.getBinaryClient().request(request)
-        if (response.status < 200 || response.status >= 300) {
-            throw new Error(`CDN returned ${response.status} for ${request.url}`)
-        }
-        if (!response.data) {
-            throw new Error(`CDN returned an empty body for ${request.url}`)
-        }
-        return decodeComixProtectedImage(response.data, response.headers)
+        const base64 = await response.base64()
+        if (!base64) throw new Error(`CDN returned an empty body for ${url}`)
+        return decodeComixProtectedImage(base64, response.headers)
     }
 
     private renderDecodedProtectedImage(

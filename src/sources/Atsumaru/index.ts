@@ -5,8 +5,9 @@ import {
     Content,
     ContentSource,
     DeepLinkContext,
-    ImageRequestHandler,
-    NetworkRequest,
+    Form,
+    CoverRequestHandler,
+    PageRequestHandler,
     PagedSearchResult,
     PageLink,
     PageLinkResolver,
@@ -15,7 +16,10 @@ import {
     SearchForm,
     SearchRequest,
     SortOption,
-    SourceInfo
+    SourceInfo,
+    SourcePreferenceProvider,
+    HttpClient,
+    ImageRequest,
 } from '@mana-app/types'
 import {
     ATSUMARU_BASE_URL,
@@ -41,14 +45,19 @@ import {
     AtsumaruFilterProps,
     AtsumaruManga
 } from './AtsumaruTypes'
+import {
+    loadAtsumaruPreferences
+} from './AtsumaruPreferences'
+import { createAtsumaruPreferenceMenu } from './AtsumaruPreferenceForm'
 
 export class Target implements
     ContentSource,
     PageLinkResolver,
-    ImageRequestHandler {
+    CoverRequestHandler, PageRequestHandler,
+    SourcePreferenceProvider {
     readonly info: SourceInfo = {
         id: 'Atsumaru',
-        version: '1.0.2',
+        version: '1.0.3',
         name: 'Atsumaru',
         description: 'Read manga, manhwa, manhua, and comics from Atsumaru.',
         thumbnail: ATSUMARU_ICON_URL,
@@ -107,6 +116,7 @@ export class Target implements
         if (allowedAtsumaruRatings(request.context).length === 0) {
             return { results: [], isLastPage: true, totalResultCount: 0 }
         }
+        const preferences = await loadAtsumaruPreferences()
 
         if (request.listId) {
             const section = getAtsumaruHomeSection(request.listId)
@@ -115,7 +125,8 @@ export class Target implements
                 request.listId,
                 request.page,
                 ATSUMARU_PAGE_SIZE,
-                request.context
+                request.context,
+                preferences
             )
             if (listRequest.kind === 'browse') {
                 const response = await this.api.getBrowse(listRequest.url)
@@ -131,7 +142,9 @@ export class Target implements
             return this.searchResponse(await this.api.getSearch(listRequest.url))
         }
 
-        const response = await this.api.getSearch(buildAtsumaruSearchUrl(request))
+        const response = await this.api.getSearch(
+            buildAtsumaruSearchUrl(request, ATSUMARU_PAGE_SIZE, preferences)
+        )
         return this.searchResponse(response)
     }
 
@@ -141,6 +154,14 @@ export class Target implements
 
     async getSortOptions(): Promise<SortOption[]> {
         return createAtsumaruSortOptions()
+    }
+
+    async getPreferenceMenu(): Promise<Form> {
+        const [filters, preferences] = await Promise.all([
+            this.api.getFilters(),
+            loadAtsumaruPreferences()
+        ])
+        return createAtsumaruPreferenceMenu(filters, preferences)
     }
 
     async getSectionsForPage(link: PageLink): Promise<PageSection[]> {
@@ -166,11 +187,13 @@ export class Target implements
         if (allowedAtsumaruRatings(context).length === 0) {
             return { items: [] }
         }
+        const preferences = await loadAtsumaruPreferences()
         const request = buildAtsumaruListRequest(
             sectionId,
             1,
             ATSUMARU_HOME_LIMIT,
-            context
+            context,
+            preferences
         )
         const manga = await this.loadList(request)
         return {
@@ -203,14 +226,17 @@ export class Target implements
         return { content: this.parser.parseHighlight(response.mangaPage) }
     }
 
-    async willRequestImage(url: string): Promise<NetworkRequest> {
-        return {
-            url,
-            headers: {
-                Referer: `${ATSUMARU_BASE_URL}/`,
-                Accept: 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5'
-            }
-        }
+    private readonly imageTransport = new HttpClient().addHeaders({
+        Referer: `${ATSUMARU_BASE_URL}/`,
+        Accept: 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5'
+    })
+
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
     }
 
     private async loadList(

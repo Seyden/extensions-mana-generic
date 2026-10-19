@@ -1,5 +1,6 @@
-/* eslint-disable linebreak-style */
 import {
+    HttpMethod,
+    CloudflareError,
     Chapter,
     ChapterData,
     Content,
@@ -8,10 +9,10 @@ import {
     ExcludableMultiSelectProp,
     Form,
     Highlight,
-    ImageRequestHandler,
-    NetworkClientBuilder,
-    NetworkRequest,
-    NetworkResponse,
+    CoverRequestHandler,
+    PageRequestHandler,
+    HttpClient,
+    HttpResponse,
     PagedSearchResult,
     PageLink,
     PageLinkResolver,
@@ -22,7 +23,11 @@ import {
     SearchForm,
     SearchListSection,
     SearchMultiPickerSheet,
+    HttpRequest,
+    RequestOrigin,
+    ImageRequest,
 } from '@mana-app/types'
+/* eslint-disable linebreak-style */
 
 import { MangaStreamParser } from './MangaStreamParser'
 import { URLBuilder } from './UrlBuilder'
@@ -51,7 +56,7 @@ export const getExportVersion = (EXTENSION_VERSION: string): string => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.')
 }
 
-export abstract class MangaStream implements ContentSource, PageLinkResolver, ImageRequestHandler {
+export abstract class MangaStream implements ContentSource, PageLinkResolver, CoverRequestHandler, PageRequestHandler {
     constructor() {
         this.configureSections()
     }
@@ -82,19 +87,18 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
 
     // ----REQUEST MANAGER----
 
-    client: NetworkClient = new NetworkClientBuilder()
-        .setRateLimit(15, 1)
-        .setTimeout(30000)
-        .addRequestInterceptor(async (request) => {
+    client: HttpClient = new HttpClient()
+        .setRateLimit(15, 1_000)
+        .setTimeoutMs(30000)
+        .addRequestInterceptor(async (request, context) => {
             const url: string = await this.getAndSetBaseUrl()
-            request.headers = {
-                ...(request.headers ?? {}),
-                ...{
-                    referer: `${url}/`,
-                    ...((request.url.includes('wordpress.com') || request.url.includes('wp.com')) && {
-                        Accept: 'image/avif,image/webp,*/*'
-                    }) // Used for images hosted on Wordpress blogs
-                }
+            request.headers.referer = `${url}/`
+            if (request.url.includes('wordpress.com') || request.url.includes('wp.com')) {
+                request.headers.accept = 'image/avif,image/webp,*/*' // Used for images hosted on Wordpress blogs
+            }
+
+            if (context.origin !== RequestOrigin.General) {
+                request.headers.origin = `${this.baseUrl}/`
             }
 
             const path: any = simpleUrl.parse(request.url, true)
@@ -109,17 +113,18 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         })
         .addResponseInterceptor(async (response) => {
             await this.interceptResponse(response)
+
             if (response.headers.location) {
                 response.headers.location = response.headers.location.replace(/^http:/, 'https:')
             }
+
             return response
         })
-        .build()
 
-    async interceptResponse(response: NetworkResponse): Promise<void> {
+    async interceptResponse(response: HttpResponse): Promise<void> {
     }
 
-    async interceptRequest(request: NetworkRequest): Promise<void> {
+    async interceptRequest(request: HttpRequest): Promise<void> {
     }
 
     /**
@@ -127,6 +132,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
      */
     finalUrl: string = ''
     abstract baseUrl: string
+
     async getAndSetBaseUrl(): Promise<string> {
         let url: string = await ObjectStore.string('Domain') ?? this.baseUrl
         this.finalUrl = url
@@ -376,7 +382,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         const request = await this.constructSearchRequest(page, query)
         const response = await this.client.request(request)
         this.checkResponseErrors(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
         const results = await this.parser.parseSearchResults($, this)
 
         //const includedTags = this.supportsTagExclusion() ? query.filters as ExcludableMultiSelectProp;
@@ -435,7 +441,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
                 addTrailingSlash: true,
                 includeUndefinedParameters: false
             }),
-            method: 'GET'
+            method: HttpMethod.Get
         }
     }
 
@@ -535,7 +541,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         const url: string = await this.getAndSetBaseUrl()
         const request = {
             url: `${url}/${path}/${slug}/`,
-            method: 'GET',
+            method: HttpMethod.Get,
         }
 
         const response = await this.client.request(request)
@@ -543,7 +549,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
 
         let postId: any
 
-        const postIdRegex = response?.headers.Link?.match(/\?p=(\d+)/)
+        const postIdRegex = response?.headers.link?.match(/\?p=(\d+)/)
         if (postIdRegex?.[1]) {
             postId = postIdRegex[1]
         }
@@ -552,7 +558,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
             return postId?.toString()
         }
 
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
 
         // Step 1: Try to get postId from shortlink
         postId = Number($('link[rel="shortlink"]')?.attr('href')?.split('/?p=')[1])
@@ -578,7 +584,7 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
         return postId.toString()
     }
 
-    async loadRequestData(url: string, method: string = 'GET'): Promise<CheerioStatic> {
+    async loadRequestData(url: string, method: HttpMethod = HttpMethod.Get): Promise<CheerioStatic> {
         const request = {
             url,
             method
@@ -586,10 +592,10 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
 
         const response = await this.client.request(request)
         this.checkResponseErrors(response)
-        return load(response.data as string)
+        return load(await response.text())
     }
 
-    checkResponseErrors(response: NetworkResponse): void {
+    checkResponseErrors(response: HttpResponse): void {
         const status = response.status
         switch (status) {
             case 403:
@@ -598,17 +604,15 @@ export abstract class MangaStream implements ContentSource, PageLinkResolver, Im
             case 404:
                 throw new Error(`The requested page ${response.request.url} was not found!`)
         }
+        response.requireOk()
     }
 
-    async willRequestImage(url: string): Promise<NetworkRequest> {
-        return {
-            url,
-            headers: {
-                'referer': `${this.baseUrl}/`,
-                'origin': `${this.baseUrl}/`,
-                ...(url.includes('wordpress.com') && { 'Accept': 'image/avif,image/webp,*/*' }) // Used for images hosted on Wordpress blogs
-            }
-        }
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.client
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.client
     }
 
     resolvePageSection(link: PageLink, sectionID: string): Promise<ResolvedPageSection> {

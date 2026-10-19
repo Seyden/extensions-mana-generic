@@ -7,10 +7,11 @@
   "scripts": {
     "test": "jest",
     "prep": "rm -rf ./dist && tsc",
-    "dev": "nodemon",
-    "build": "mana build",
-    "serve": "mana serve",
-    "lint": "eslint"
+    "dev": "mana-dev serve --watch",
+    "build": "mana-dev build",
+    "serve": "mana-dev serve",
+    "lint": "eslint",
+    "check": "tsc --noEmit"
   },
   "author": {
     "name": "Seyden",
@@ -19,6 +20,7 @@
   },
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@mana-app/dev": "^0.2.0",
     "@tsconfig/recommended": "^1.0.1",
     "@types/cheerio": "^0.22.21",
     "@types/crypto-js": "^4.1.1",
@@ -35,7 +37,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@mana-app/types": "0.0.27",
+    "@mana-app/types": "0.1.1",
     "@sinonjs/text-encoding": "^0.7.3",
     "@types/cheerio": "^0.22.21",
     "cheerio": "^1.0.0-rc.12",

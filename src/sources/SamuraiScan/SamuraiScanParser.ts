@@ -1,6 +1,5 @@
 import {
     Content,
-    Property,
     PublicationStatus,
     Tag
 } from '@mana-app/types'
@@ -38,17 +37,10 @@ export class SamuraiScanParser extends Parser {
             genres.push({ title: label, id: id })
         }
 
-        const properties: Property[] = [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: genres
-            }
-        ]
 
         return {
             title,
-            properties,
+            tags: genres,
             status,
             summary: description,
             cover: image,

@@ -5,8 +5,8 @@ import {
     Content,
     ContentSource,
     Form,
-    ImageRequestHandler,
-    NetworkRequest,
+    CoverRequestHandler,
+    PageRequestHandler,
     PagedSearchResult,
     PageLink,
     PageLinkResolver,
@@ -20,7 +20,9 @@ import {
     SourceContext,
     SourceContextOrigin,
     SourceInfo,
-    SourcePreferenceProvider
+    SourcePreferenceProvider,
+    HttpClient,
+    ImageRequest,
 } from '@mana-app/types'
 import { MangaDotApi } from './MangaDotApi'
 import {
@@ -55,7 +57,7 @@ import {
 export class Target implements
     ContentSource,
     PageLinkResolver,
-    ImageRequestHandler,
+    CoverRequestHandler, PageRequestHandler,
     SourcePreferenceProvider {
     readonly info: SourceInfo = {
         id: 'MangaDot',
@@ -208,23 +210,25 @@ export class Target implements
         throw new Error('MangaDot page sections are returned fully resolved')
     }
 
-    async willRequestImage(imageURL: string): Promise<NetworkRequest> {
-        try {
-            const host = new URL(imageURL).hostname
-            const mangaDotHost = new URL(MANGADOT_DOMAIN).hostname
-            if (host === mangaDotHost || host.endsWith(`.${mangaDotHost}`)) {
-                return {
-                    url: imageURL,
-                    headers: {
-                        Referer: `${MANGADOT_DOMAIN}/`,
-                        Origin: MANGADOT_DOMAIN
-                    }
-                }
+    private readonly imageTransport = new HttpClient()
+        .addRequestInterceptor((request) => {
+            const host = new URL(request.url).hostname
+            const siteHost = new URL(MANGADOT_DOMAIN).hostname
+
+            if (host === siteHost || host.endsWith(`.${siteHost}`)) {
+                request.headers.referer = `${MANGADOT_DOMAIN}/`
+                request.headers.origin = MANGADOT_DOMAIN
             }
-        } catch {
-            // Let the app surface malformed external image URLs normally.
-        }
-        return { url: imageURL }
+
+            return request
+        })
+
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
     }
 
     private async searchWithPreferences(

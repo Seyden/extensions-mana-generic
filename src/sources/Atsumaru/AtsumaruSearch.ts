@@ -3,11 +3,13 @@ import {
     Option,
     SearchExcludableMultiPickerSheet,
     SearchForm,
+    SearchGroup,
     SearchListSection,
     SearchMultiPicker,
     SearchRequest,
     SearchSortSection,
     SearchStepper,
+    SearchTagsSection,
     SearchToggle,
     SectionStyle,
     SortOption
@@ -18,6 +20,12 @@ import {
     AtsumaruFilterData,
     AtsumaruFilterProps
 } from './AtsumaruTypes'
+import {
+    ATSUMARU_TYPES,
+    AtsumaruPreferences,
+    DEFAULT_ATSUMARU_PREFERENCES
+} from './AtsumaruPreferences'
+import { groupAtsumaruTags } from './AtsumaruTags'
 
 export const ATSUMARU_PAGE_SIZE = 40
 export const ATSUMARU_HOME_LIMIT = 15
@@ -145,13 +153,23 @@ export function allowedAtsumaruRatings(
         .map((rating) => rating.api)
 }
 
+function preferenceExclusions(
+    values: string[],
+    selection: AtsumaruFilterProps['genres']
+): string[] {
+    const included = new Set((selection?.included ?? []).map((option) => option.id))
+    const excluded = (selection?.excluded ?? []).map((option) => option.id)
+    return [...new Set([...excluded, ...values.filter((id) => !included.has(id))])]
+}
+
 function addExcludableFilter(
     filters: string[],
     field: string,
-    selection: AtsumaruFilterProps['genres']
+    selection: AtsumaruFilterProps['genres'],
+    defaultExcluded: string[] = []
 ): void {
     const included = selection?.included ?? []
-    const excluded = selection?.excluded ?? []
+    const excluded = preferenceExclusions(defaultExcluded, selection)
 
     if (included.length > 0) {
         filters.push(
@@ -161,40 +179,53 @@ function addExcludableFilter(
         )
     }
     if (excluded.length > 0) {
-        filters.push(`${field}:!=[${quotedList(excluded)}]`)
+        filters.push(`${field}:!=[${quotedValues(excluded)}]`)
     }
 }
 
 export function createAtsumaruSearchForm(filters: AtsumaruFilterData): SearchForm {
+    const tagGroups = groupAtsumaruTags(filters.tags)
     return {
         sections: [
             SearchListSection({
-                children: [
-                    SearchExcludableMultiPickerSheet({
-                        id: 'genres',
-                        title: 'Genres',
-                        options: toOptions(filters.genres)
-                    }),
-                    SearchExcludableMultiPickerSheet({
-                        id: 'tags',
-                        title: 'Tags',
-                        options: toOptions(filters.tags)
-                    })
-                ]
+                header: 'Genres & tags',
+                children: [SearchExcludableMultiPickerSheet({
+                    id: 'genres',
+                    title: 'Genres',
+                    options: toOptions(filters.genres)
+                }), ...(tagGroups.length > 0 ? [SearchGroup({
+                    id: 'tags',
+                    title: 'Tags',
+                    children: tagGroups.map((group) =>
+                        SearchExcludableMultiPickerSheet({
+                            id: `t_${group.id}`,
+                            title: group.title,
+                            options: toOptions(group.tags)
+                        })
+                    )
+                })] : [])]
+            }),
+            SearchTagsSection({
+                header: 'Type',
+                field: SearchMultiPicker({
+                    id: 'types',
+                    title: 'Type',
+                    options: toOptions(filters.types).filter((option) =>
+                        (ATSUMARU_TYPES as readonly string[]).includes(option.id)
+                    )
+                })
+            }),
+            SearchTagsSection({
+                header: 'Status',
+                field: SearchMultiPicker({
+                    id: 'statuses',
+                    title: 'Status',
+                    options: toOptions(filters.statuses)
+                })
             }),
             SearchListSection({
                 header: 'Publication',
                 children: [
-                    SearchMultiPicker({
-                        id: 'types',
-                        title: 'Type',
-                        options: toOptions(filters.types)
-                    }),
-                    SearchMultiPicker({
-                        id: 'statuses',
-                        title: 'Status',
-                        options: toOptions(filters.statuses)
-                    }),
                     SearchStepper({
                         id: 'year',
                         title: 'Release year',
@@ -232,7 +263,8 @@ export function createAtsumaruSortOptions(): SortOption[] {
 
 export function buildAtsumaruSearchUrl(
     request: SearchRequest<AtsumaruFilterProps>,
-    pageSize = ATSUMARU_PAGE_SIZE
+    pageSize = ATSUMARU_PAGE_SIZE,
+    preferences: AtsumaruPreferences = DEFAULT_ATSUMARU_PREFERENCES
 ): string {
     const query = request.query?.trim() ?? ''
     const filters = [
@@ -240,6 +272,11 @@ export function buildAtsumaruSearchUrl(
         'medium:=[`Comic`]'
     ]
     const selected = request.filters
+    const tagSelections = Object.entries(selected ?? {}).flatMap(([id, value]) =>
+        id.startsWith('t_')
+            ? [value as AtsumaruFilterProps[`t_${string}`]]
+            : []
+    )
     const ratings = allowedAtsumaruRatings(request.context)
 
     if (ratings.length === 0) {
@@ -249,10 +286,27 @@ export function buildAtsumaruSearchUrl(
         if (!ratings.includes('Pornographic')) filters.push('isAdult:=false')
     }
 
-    addExcludableFilter(filters, 'genreIds', selected?.genres)
-    addExcludableFilter(filters, 'tagIds', selected?.tags)
+    addExcludableFilter(
+        filters,
+        'genreIds',
+        selected?.genres,
+        preferences.excludedGenres
+    )
+    addExcludableFilter(
+        filters,
+        'tagIds',
+        {
+            included: tagSelections.flatMap((selection) => selection?.included ?? []),
+            excluded: tagSelections.flatMap((selection) => selection?.excluded ?? [])
+        },
+        preferences.excludedTags
+    )
 
-    const types = quotedList(selected?.types)
+    const types = quotedList(
+        selected?.types?.length
+            ? selected.types
+            : preferences.types.map((id) => ({ id, title: id }))
+    )
     if (types) filters.push(`type:=[${types}]`)
 
     const statuses = quotedList(selected?.statuses)
@@ -292,7 +346,8 @@ export function buildAtsumaruListRequest(
     sectionId: string,
     page: number,
     limit = ATSUMARU_PAGE_SIZE,
-    context?: AtsumaruSourceContext
+    context?: AtsumaruSourceContext,
+    preferences: AtsumaruPreferences = DEFAULT_ATSUMARU_PREFERENCES
 ): AtsumaruListRequest {
     const section = getAtsumaruHomeSection(sectionId)
     if (!section) throw new Error(`Unknown Atsumaru list: ${sectionId}`)
@@ -304,21 +359,28 @@ export function buildAtsumaruListRequest(
                 page,
                 context,
                 sort: { id: section.searchSort, ascending: false }
-            }, limit)
+            }, limit, preferences)
         }
     }
 
     const ratings = allowedAtsumaruRatings(context)
+    const excludedTags = [
+        ...preferences.excludedGenres,
+        ...preferences.excludedTags
+    ]
     return {
         kind: 'browse',
         url: createAtsumaruUrl(`/api/home2/${section.endpoint}`, {
             offset: (Math.max(1, page) - 1) * limit,
             limit,
-            types: 'Manga,Manwha,Manhua,OEL',
+            types: preferences.types.join(','),
             mediums: 'Comic',
             adult: ratings.includes('Pornographic') ? 1 : undefined,
             contentRatings: ratings.length < ATSUMARU_RATINGS.length
                 ? ratings.join(',')
+                : undefined,
+            excludedTags: excludedTags.length > 0
+                ? excludedTags.join(',')
                 : undefined,
             timeframe: section.timeframe
         })

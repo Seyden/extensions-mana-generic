@@ -29,6 +29,7 @@ export interface AtsumaruTaxonomyItem {
     id: string
     name: string
     namePath?: string
+    group?: string
     weight?: string
 }
 
@@ -48,6 +49,8 @@ export interface AtsumaruManga {
     englishTitle?: string | null
     image?: AtsumaruImage
     poster?: AtsumaruImage
+    posterSmall?: string | null
+    posterMedium?: string | null
     smallImage?: string | null
     mediumImage?: string | null
     largeImage?: string | null
@@ -129,6 +132,7 @@ export interface AtsumaruChapterResponse {
 export interface AtsumaruFilterOption {
     id: string
     name: string
+    group?: string
 }
 
 export interface AtsumaruFilterData {
@@ -139,8 +143,8 @@ export interface AtsumaruFilterData {
 }
 
 export type AtsumaruFilterProps = {
+    [key: `t_${string}`]: ExcludableMultiSelectProp
     genres?: ExcludableMultiSelectProp
-    tags?: ExcludableMultiSelectProp
     types?: Option[]
     statuses?: Option[]
     year?: number

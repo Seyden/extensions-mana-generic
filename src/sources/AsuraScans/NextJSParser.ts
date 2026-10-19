@@ -103,9 +103,6 @@ export class NextJSParser {
 
             const strSplitIndex = line.indexOf(':')
             if (strSplitIndex === -1) {
-                console.log(
-                    `Hi, this is the edgecase: ${line}; ${this.currentChunk}, ${this.currentChunkInByteArray.length}, ${this.expectedByteArrayLength}`
-                )
                 throw new Error(
                     'Uncaught edgecase, please report to get this fixed!'
                 )

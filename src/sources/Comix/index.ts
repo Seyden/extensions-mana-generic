@@ -4,7 +4,8 @@ import {
     Content,
     ContentSource,
     Form,
-    ImageRequestHandler,
+    CoverRequestHandler,
+    PageRequestHandler,
     PagedSearchResult,
     PageLink,
     PageLinkResolver,
@@ -17,7 +18,9 @@ import {
     SectionStyle,
     SortOption,
     SourceInfo,
-    SourcePreferenceProvider
+    SourcePreferenceProvider,
+    HttpClient,
+    ImageRequest,
 } from '@mana-app/types'
 import {
     ComixFilterProps,
@@ -39,12 +42,12 @@ import {
     loadComixPreferences
 } from './ComixPreferences'
 import { createComixPreferenceMenu } from './ComixPreferenceForm'
-import { createComixImageRequest } from './ComixImageRequest'
+import { createComixImageTransport } from './ComixImageRequest'
 
 export class Target implements
     ContentSource,
     PageLinkResolver,
-    ImageRequestHandler,
+    CoverRequestHandler, PageRequestHandler,
     SourcePreferenceProvider {
     readonly info: SourceInfo = COMIX_SOURCE_INFO
 
@@ -193,7 +196,13 @@ export class Target implements
         throw new Error('Comix page sections are returned fully resolved')
     }
 
-    async willRequestImage(url: string) {
-        return createComixImageRequest(url)
+    private readonly imageTransport = createComixImageTransport()
+
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.imageTransport
     }
 }

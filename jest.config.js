@@ -1,6 +1,6 @@
 ﻿/* eslint-disable no-undef */
 /** @type {import('@jest/types').Config.InitialOptions} */
-module.exports = {
+export default {
   preset: "ts-jest",
   testEnvironment: "node",
   testMatch: ["**/**/*.test.ts"],

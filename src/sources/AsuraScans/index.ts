@@ -1,6 +1,5 @@
-/* eslint-disable linebreak-style */
-
 import {
+    HttpMethod,
     Chapter,
     ChapterData,
     Content,
@@ -13,8 +12,10 @@ import {
     SearchRequest,
     SortOption,
     SourceContext,
-    SourceInfo
+    SourceInfo,
 } from '@mana-app/types'
+/* eslint-disable linebreak-style */
+
 import { AsuraScansApi, SERIES_PAGE_LIMIT } from './AsuraScansApi'
 import { HOME_SECTIONS, SOURCE_INFO, STATUS_TYPES } from './AsuraScansInfo'
 import { FilterProps, StatusTypes } from './AsuraScansInterfaces'
@@ -28,19 +29,32 @@ export class Target extends AsuraScansBase implements ContentSource, PageLinkRes
     manga_StatusTypes: StatusTypes = STATUS_TYPES
     private readonly api = new AsuraScansApi(this.client)
 
-    async getContent(mangaId: string, _?: SourceContext): Promise<Content> {
+    async getContent(mangaId: string, context?: SourceContext): Promise<Content> {
         return getContent(this.client, this.parser, mangaId, this)
     }
-    async getChapters(mangaId: string): Promise<Chapter[]> { return getChapters(this.client, this.parser, mangaId, this) }
-    async getChapterData(mangaId: string, chapterId: string, chapter?: Chapter): Promise<ChapterData> { return getChapterData(this.client, this.parser, mangaId, chapterId, chapter) }
 
-    async getSortOptions(): Promise<SortOption[]> { return getSortOptions() }
-    async getSearchForm(): Promise<SearchForm> { return getSearchForm(this.client, this.parser) }
+    async getChapters(mangaId: string): Promise<Chapter[]> {
+        return getChapters(this.client, this.parser, mangaId, this)
+    }
+
+    async getChapterData(mangaId: string, chapterId: string, chapter?: Chapter): Promise<ChapterData> {
+        return getChapterData(this.client, this.parser, mangaId, chapterId, chapter)
+    }
+
+    async getSortOptions(): Promise<SortOption[]> {
+        return getSortOptions()
+    }
+
+    async getSearchForm(): Promise<SearchForm> {
+        return getSearchForm(this.client, this.parser)
+    }
+
     async search(searchRequest: SearchRequest<FilterProps>): Promise<PagedSearchResult> {
         return search(this.api, this.parser, searchRequest, await this.getBaseUrl(), this.fallbackImage)
     }
+
     async constructSearchRequest(page: number, query: SearchRequest<FilterProps>): Promise<any> {
-        return { url: constructSearchUrl((page - 1) * SERIES_PAGE_LIMIT, query), method: 'GET' }
+        return { url: constructSearchUrl((page - 1) * SERIES_PAGE_LIMIT, query), method: HttpMethod.Get }
     }
 
     async getSectionsForPage(link: PageLink): Promise<PageSection[]> {

@@ -1,12 +1,13 @@
 import {
+    CloudflareError,
     Chapter,
     ChapterData,
     Content,
     ContentSource,
-    ImageRequestHandler,
-    NetworkClientBuilder,
-    NetworkRequest,
-    NetworkResponse,
+    CoverRequestHandler,
+    PageRequestHandler,
+    HttpClient,
+    HttpResponse,
     Option,
     PagedSearchResult,
     PageLink,
@@ -24,7 +25,9 @@ import {
     SearchStepper,
     SectionStyle,
     SortOption,
-    SourceInfo
+    SourceInfo,
+    ImageRequest,
+    RequestOrigin,
 } from '@mana-app/types'
 import {
     IkenChapterResponse,
@@ -87,7 +90,7 @@ export function buildIkenSearchParameters(
     }
 }
 
-export abstract class Iken implements ContentSource, PageLinkResolver, ImageRequestHandler {
+export abstract class Iken implements ContentSource, PageLinkResolver, CoverRequestHandler, PageRequestHandler {
     abstract info: SourceInfo
     abstract baseUrl: string
 
@@ -137,18 +140,19 @@ export abstract class Iken implements ContentSource, PageLinkResolver, ImageRequ
         }
     ]
 
-    client: NetworkClient = new NetworkClientBuilder()
-        .setRateLimit(10, 1)
-        .setTimeout(30000)
-        .addRequestInterceptor(async (request) => ({
-            ...request,
-            headers: {
-                ...(request.headers ?? {}),
-                referer: `${this.baseUrl}/`,
-                origin: this.baseUrl
+    client: HttpClient = new HttpClient()
+        .setRateLimit(10, 1_000)
+        .setTimeoutMs(30000)
+        .addRequestInterceptor((request, context) => {
+            request.headers.referer = `${this.baseUrl}/`
+            request.headers.origin = this.baseUrl
+
+            if (context.origin !== RequestOrigin.General) {
+                request.headers.accept = 'image/avif,image/webp,image/png,image/*;q=0.8,*/*;q=0.5'
             }
-        }))
-        .build()
+
+            return request
+        })
 
     get apiUrl(): string {
         return this.baseUrl.replace(/^(https?:\/\/)(?:www\.)?/, '$1api.')
@@ -321,15 +325,12 @@ export abstract class Iken implements ContentSource, PageLinkResolver, ImageRequ
         }))
     }
 
-    async willRequestImage(url: string): Promise<NetworkRequest> {
-        return {
-            url,
-            headers: {
-                referer: `${this.baseUrl}/`,
-                origin: this.baseUrl,
-                Accept: 'image/avif,image/webp,image/png,image/*;q=0.8,*/*;q=0.5'
-            }
-        }
+    getCoverTransport(_request: ImageRequest): HttpClient {
+        return this.client
+    }
+
+    getPageTransport(_request: ImageRequest): HttpClient {
+        return this.client
     }
 
     async resolvePageSection(_link: PageLink, _sectionId: string): Promise<ResolvedPageSection> {
@@ -338,27 +339,18 @@ export abstract class Iken implements ContentSource, PageLinkResolver, ImageRequ
 
     protected async getJson<T>(path: string, parameters: Record<string, IkenQueryValue> = {}): Promise<T> {
         const url = buildIkenApiUrl(this.apiUrl, path, parameters)
-        const response = await this.client.request({
-            url,
-            method: 'GET',
-            validateStatus: (status) => status === 403
-                || status === 404
-                || status === 503
-                || (status >= 200 && status < 300)
-        })
+        const response = await this.client.get(url)
 
         this.checkResponse(response)
 
         try {
-            return (typeof response.data === 'string'
-                ? JSON.parse(response.data)
-                : response.data) as T
+            return await response.json<T>()
         } catch {
             throw new Error(`Invalid JSON response from ${url}`)
         }
     }
 
-    private checkResponse(response: NetworkResponse): void {
+    private checkResponse(response: HttpResponse): void {
         switch (response.status) {
             case 403:
             case 503:

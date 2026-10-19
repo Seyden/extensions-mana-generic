@@ -1,8 +1,9 @@
 import {
-    NetworkRequest,
-    NetworkResponse,
+    HttpClient,
+    CloudflareError,
+    HttpResponse,
     Tag,
-    Option
+    Option,
 } from '@mana-app/types'
 
 export function getSelectValue(filterValue: Option | undefined): any {
@@ -31,34 +32,21 @@ export async function setMangaSlug(mangaId: string, link: string): Promise<void>
     await ObjectStore.set(`${mangaId}:slug`, link)
 }
 
-export async function loadRequestData(client: NetworkClient, url: string, method: string = 'GET'): Promise<string> {
-    const request: NetworkRequest = {
-        url,
-        method,
-        validateStatus: s => s == 404 || s == 403 || s == 503 || (s >= 200 && s < 300)
-    }
-
-    const response = await client.request(request)
+export async function loadJsonData<T>(client: HttpClient, url: string): Promise<T> {
+    const response = await client.get(url)
     checkResponseErrors(response)
-    return response.data as string
+    return response.json<T>()
 }
 
-export async function loadJsonData<T extends object>(client: NetworkClient, url: string, method: string = 'GET'): Promise<T> {
-    const data = await loadRequestData(client, url, method)
-    try {
-        return JSON.parse(data) as T
-    } catch {
-        throw new Error(`Invalid AsuraScans JSON response: ${url}`)
-    }
-}
-
-export function checkResponseErrors(response: NetworkResponse): void {
+export function checkResponseErrors(response: HttpResponse): void {
     const status = response.status
     switch (status) {
-    case 403:
-    case 503:
-        throw new CloudflareError(response.request.url)
-    case 404:
-        throw new Error(`The requested page ${response.request.url} was not found!`)
+        case 403:
+        case 503:
+            throw new CloudflareError(response.request.url)
+        case 404:
+            throw new Error(`The requested page ${response.request.url} was not found!`)
     }
+
+    response.requireOk()
 }

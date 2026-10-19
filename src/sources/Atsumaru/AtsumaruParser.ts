@@ -31,6 +31,7 @@ import {
     AtsumaruScanlator,
     AtsumaruTaxonomyItem
 } from './AtsumaruTypes'
+import { groupAtsumaruTags } from './AtsumaruTags'
 
 interface NamedTaxonomyItem {
     id: string
@@ -75,16 +76,18 @@ function imageCandidates(manga: AtsumaruManga): string[] {
         manga.largeImage,
         poster?.largeImage,
         image?.largeImage,
+        manga.posterMedium,
         manga.mediumImage,
         poster?.mediumImage,
         image?.mediumImage,
+        manga.posterSmall,
+        manga.smallImage,
+        poster?.smallImage,
+        image?.smallImage,
         primitiveImage(manga.poster),
         primitiveImage(manga.image),
         poster?.image,
-        image?.image,
-        manga.smallImage,
-        poster?.smallImage,
-        image?.smallImage
+        image?.image
     ]).map((value) => normalizeAtsumaruAssetUrl(value) as string)
 }
 
@@ -102,6 +105,19 @@ function namedTaxonomy(
         seen.add(id)
         return [{ id, name }]
     })
+}
+
+function narrativeTagSections(
+    values: AtsumaruManga['tags']
+): AdditionalInfoSection[] {
+    return groupAtsumaruTags(values).map((group) => tagInfo.section({
+        id: `t_${group.id}`,
+        title: group.title,
+        items: group.tags.map((tag) => tagInfo.item({
+            id: tag.id,
+            title: tag.name
+        }))
+    }))
 }
 
 function people(values: AtsumaruManga['authors']): AtsumaruPerson[] {
@@ -375,7 +391,7 @@ export class AtsumaruParser {
         const covers = imageCandidates(manga)
         const cover = covers[0] ?? ATSUMARU_ICON_URL
         const genres = namedTaxonomy(manga.genres)
-        const narrativeTags = namedTaxonomy(manga.tags)
+        const narrativeTags = narrativeTagSections(manga.tags)
         const staffItems = people(manga.authors).map((person, index) =>
             staff.item({
                 id: person.id ?? `${person.type ?? 'staff'}:${index}:${person.name}`,
@@ -401,13 +417,7 @@ export class AtsumaruParser {
                 hasMore: false,
                 items: staffItems
             })] : []),
-            ...(narrativeTags.length > 0 ? [tagInfo.section({
-                id: 'tags',
-                title: 'Tags',
-                items: narrativeTags.map((tag) =>
-                    tagInfo.item({ id: tag.id, title: tag.name })
-                )
-            })] : []),
+            ...narrativeTags,
             ...(relatedItems.length > 0 ? [highlights.section({
                 id: 'related',
                 title: 'Related Titles',

@@ -8,9 +8,9 @@ import {
     ChapterData,
     ChapterPage,
     Content,
+    additionalInfo,
     FilterType,
     Highlight,
-    Property,
     PublicationStatus,
     Tag
 } from '@mana-app/types'
@@ -63,28 +63,9 @@ export class MangaStreamParser {
                 break
         }
 
-        const properties: Property[] = [
-            {
-                id: "genres",
-                title: "Genres",
-                tags: arrayTags
-            },
-            ... author != '' || artist != '' ? [{
-                id: "creators",
-                title: "Credits",
-                tags: [
-                    ... author != '' ? [{
-                        title: author,
-                        id: `author-${author}`,
-                        noninteractive: true
-                    }] : [],
-                    ... artist != '' ? [{
-                        title: artist,
-                        id: `artist-${artist}`,
-                        noninteractive: true
-                    }] : [],
-                ],
-            }] : []
+        const credits = [
+            ...(author ? [{ id: `author-${author}`, title: author }] : []),
+            ...(artist ? [{ id: `artist-${artist}`, title: artist }] : [])
         ]
 
         const chapters = await this.parseChapterList($, mangaId, source)
@@ -93,7 +74,11 @@ export class MangaStreamParser {
             title: titles[0]!,
             additionalTitles: titles,
             status,
-            properties,
+            tags: arrayTags,
+            additionalInfo: credits.length ? [additionalInfo.staff.section({
+                id: 'creators', title: 'Credits', hasMore: false,
+                items: credits.map((credit) => additionalInfo.staff.item(credit))
+            })] : undefined,
             summary: description,
             cover: image || source.fallbackImage,
             ...(chapters.length > 0 && { chapters })

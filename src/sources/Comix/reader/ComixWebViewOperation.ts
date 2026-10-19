@@ -29,16 +29,10 @@ export async function executeComixWebViewOperation(
     type PageMangaApi = {
         list(params?: PageRecord): Promise<unknown>
         top(params?: PageRecord): Promise<unknown>
-        get(mangaId: string): Promise<unknown>
         chapters(mangaId: string, params?: PageRecord): Promise<PagePagedResponse>
-        groups(mangaId: string): Promise<unknown>
     }
     type PageHttpApi = {
         get(path: string, options?: PageRecord): Promise<unknown>
-        post(path: string, data?: unknown, options?: PageRecord): Promise<unknown>
-        put(path: string, data?: unknown, options?: PageRecord): Promise<unknown>
-        patch(path: string, data?: unknown, options?: PageRecord): Promise<unknown>
-        delete(path: string, options?: PageRecord): Promise<unknown>
     }
     type PageItem = {
         url?: unknown
@@ -54,24 +48,6 @@ export async function executeComixWebViewOperation(
 
     const isFunction = (value: unknown): value is (...args: never[]) => unknown =>
         typeof value === 'function'
-
-    const isMangaApi = (value: unknown): value is PageMangaApi => {
-        if (!isRecord(value)) return false
-        return isFunction(value.list) &&
-            isFunction(value.top) &&
-            isFunction(value.get) &&
-            isFunction(value.chapters) &&
-            isFunction(value.groups)
-    }
-
-    const isHttpApi = (value: unknown): value is PageHttpApi => {
-        if (!isRecord(value)) return false
-        return isFunction(value.get) &&
-            isFunction(value.post) &&
-            isFunction(value.put) &&
-            isFunction(value.patch) &&
-            isFunction(value.delete)
-    }
 
     const payloadRecord = isRecord(requestedPayload) ? requestedPayload : {}
     const mangaId = typeof payloadRecord.mangaId === 'string'
@@ -106,23 +82,74 @@ export async function executeComixWebViewOperation(
         throw new Error(`Could not load the Comix main bundle (${mainResponse.status})`)
     }
     const mainJavaScript = await mainResponse.text()
-    const environmentFile = mainJavaScript.match(
-        /from\s*["']\.\/(env-[^"']+\.js)["']/
-    )?.[1]
-    if (!environmentFile) {
-        throw new Error('Could not find the Comix environment bundle')
-    }
-
     const importBundle = new Function(
         'url',
         'return import(url)'
     ) as (url: string) => Promise<PageRecord>
-    const environment = await importBundle(
-        new URL(environmentFile, mainScript.src).href
-    )
-    const mangaApi = Object.values(environment).find(isMangaApi)
-    if (!mangaApi) {
-        throw new Error('Could not find the Comix manga API')
+
+    // Follow module imports, not build-specific filenames such as env-*.js.
+    const bundleUrls = [...new Set(Array.from(
+        mainJavaScript.matchAll(/\bfrom\s*["'](\.\/[^"']+\.js)["']/g),
+        (match) => new URL(match[1]!, mainScript.src).href
+    ))]
+    let httpApi: PageHttpApi | undefined
+    const failures: string[] = []
+    for (let start = 0; start < bundleUrls.length && !httpApi; start += 4) {
+        const bundles = await Promise.all(bundleUrls.slice(start, start + 4).map(async (url) => {
+            try {
+                const response = await fetch(url)
+                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                return { url, code: await response.text() }
+            } catch (error) {
+                failures.push(`${url}: ${String(error)}`)
+                return undefined
+            }
+        }))
+        for (const bundle of bundles) {
+            if (!bundle || !bundle.code.includes('/api/v1') ||
+                !bundle.code.includes('/manga/top')) continue
+
+            // Import the original module so its client retains Comix's security
+            // interceptors. Never recreate or evaluate a copied client definition.
+            const module = await importBundle(bundle.url)
+            for (const value of Object.values(module)) {
+                if (!isRecord(value)) continue
+                const methods = new Map<string, { key: string; client: string }>()
+                for (const [key, method] of Object.entries(value)) {
+                    if (!isFunction(method)) continue
+                    const match = Function.prototype.toString.call(method).match(
+                        /\(\s*await\s+([$\w]+)\.(get|post|put|patch|delete)\s*\([^)]*\)\s*\)\s*\.data\b/
+                    )
+                    if (match) methods.set(match[2]!, { key, client: match[1]! })
+                }
+                const get = methods.get('get')
+                if (!get || !['post', 'put', 'patch', 'delete'].every(
+                    (verb) => methods.get(verb)?.client === get.client
+                )) continue
+                const method = value[get.key] as PageHttpApi['get']
+                httpApi = { get: (path, options) => method.call(value, path, options) }
+                break
+            }
+            if (httpApi) break
+        }
+    }
+    if (!httpApi) {
+        throw new Error('Could not discover the Comix authenticated HTTP wrapper' +
+            (failures.length ? `; bundle loading failed: ${failures.join('; ')}` : ''))
+    }
+    const client = httpApi
+    // The HTTP wrapper returns readable API fields. The site's manga wrapper
+    // now converts them into build-specific names, so call the endpoints directly.
+    const mangaApi: PageMangaApi = {
+        list: (params) => client.get('/manga', { params }),
+        top: (params) => client.get('/manga/top', { params }),
+        chapters: async (id, params) => {
+            const response = await client.get(`/manga/${encodeURIComponent(id)}/chapters`, { params })
+            if (!isRecord(response) || !Array.isArray(response.items)) {
+                throw new Error('Comix returned invalid chapter list data')
+            }
+            return response as PagePagedResponse
+        }
     }
 
     if (requestedOperation === 'list') {
@@ -132,17 +159,12 @@ export async function executeComixWebViewOperation(
             lookups.artists.length > 0
 
         if (hasLookups) {
-            const httpApi = Object.values(environment).find(isHttpApi)
-            if (!httpApi) {
-                throw new Error('Could not find the Comix authenticated HTTP client')
-            }
-
             const resolveIds = async (
                 type: 'tag' | 'author' | 'artist',
                 names: string[]
             ): Promise<string[]> => {
                 const responses = await Promise.all(names.map((name) =>
-                    httpApi.get('/tags/search', {
+                    client.get('/tags/search', {
                         params: { type, q: name }
                     })
                 ))
@@ -268,11 +290,7 @@ export async function executeComixWebViewOperation(
     }
     if (!chapterId) throw new Error('Missing Comix chapter ID')
 
-    const httpApi = Object.values(environment).find(isHttpApi)
-    if (!httpApi) {
-        throw new Error('Could not find the Comix authenticated HTTP client')
-    }
-    const chapterResponse = await httpApi.get(`/chapters/${chapterId}`)
+    const chapterResponse = await client.get(`/chapters/${encodeURIComponent(chapterId)}`)
     if (!isRecord(chapterResponse)) {
         throw new Error(`Comix returned invalid reader data for chapter ${chapterId}`)
     }
@@ -309,7 +327,8 @@ export async function executeComixWebViewOperation(
         const combinedPath = /^https?:\/\//i.test(rawPath)
             ? rawPath
             : pageBaseUrl
-                ? `${pageBaseUrl.replace(/\/+$/, '')}/${rawPath.replace(/^\/+/, '')}`
+                // Comix treats baseUrl as an exact prefix, not a directory.
+                ? `${pageBaseUrl}${rawPath}`
                 : rawPath
         const resolvedUrl = combinedPath
             ? new URL(combinedPath, window.location.origin).href

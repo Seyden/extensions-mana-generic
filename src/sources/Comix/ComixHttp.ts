@@ -1,6 +1,6 @@
 import {
-    NetworkClientBuilder,
-    NetworkRequest
+    CloudflareError,
+    HttpClient,
 } from '@mana-app/types'
 import { load } from 'cheerio'
 import {
@@ -62,16 +62,15 @@ export function parseComixBrowseOptionsFromHtml(html: string): ComixBrowseOption
 }
 
 export class ComixHttpClient {
-    private readonly client: NetworkClient
+    private readonly client: HttpClient
 
-    constructor(client?: NetworkClient) {
-        this.client = client ?? new NetworkClientBuilder()
-            .setRateLimit(5, 1)
-            .setTimeout(30_000)
+    constructor(client?: HttpClient) {
+        this.client = client ?? new HttpClient()
+            .setRateLimit(5, 1_000)
+            .setTimeoutMs(30_000)
             .addHeader('Referer', `${COMIX_DOMAIN}/`)
             .addHeader('Origin', COMIX_DOMAIN)
             .addHeader('Accept', 'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8')
-            .build()
     }
 
     async getManga(mangaId: string): Promise<ComixManga> {
@@ -84,26 +83,14 @@ export class ComixHttpClient {
     }
 
     private async getHtml(path: string): Promise<string> {
-        const request: NetworkRequest = {
-            url: `${COMIX_DOMAIN}${path}`,
-            method: 'GET',
-            // Let Comix attach the attempted URL to Cloudflare errors instead of
-            // allowing the generic network validator to discard that context.
-            validateStatus: (status) =>
-                (status >= 200 && status < 400) ||
-                status === 403 ||
-                status === 503
-        }
-        const response = await this.client.request(request)
+        const url = `${COMIX_DOMAIN}${path}`
+        const response = await this.client.get(url)
         if (response.status === 403 || response.status === 503) {
-            throw new CloudflareError(request.url)
+            throw new CloudflareError(url)
         }
         if (response.status < 200 || response.status >= 400) {
             throw new Error(`Comix request failed (${response.status}) for ${path}`)
         }
-        if (typeof response.data !== 'string') {
-            throw new Error(`Comix returned invalid HTML for ${path}`)
-        }
-        return response.data
+        return response.text()
     }
 }

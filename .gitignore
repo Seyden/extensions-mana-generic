@@ -126,3 +126,5 @@ docs
 .DS_Store
 todo
 package-lock.json
+# TypeScript output (tsc outDir)
+lib

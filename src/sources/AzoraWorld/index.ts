@@ -1,4 +1,5 @@
 import {
+    HttpMethod,
     SourceInfo,
     CatalogRating,
     PageLink,
@@ -6,9 +7,8 @@ import {
     SectionStyle,
     Highlight,
     PagedSearchResult,
-    SearchRequest
+    SearchRequest,
 } from '@mana-app/types'
-
 import {
     getExportVersion,
     Madara
@@ -51,7 +51,7 @@ export class Target extends Madara {
             {
                 request: {
                     url: `${this.baseUrl}/${this.directoryPath}/?m_orderby=latest`,
-                    method: 'GET'
+                    method: HttpMethod.Get
                 },
                 section: {
                     id: '0',
@@ -63,7 +63,7 @@ export class Target extends Madara {
             {
                 request: {
                     url: `${this.baseUrl}/${this.directoryPath}/?m_orderby=trending`,
-                    method: 'GET'
+                    method: HttpMethod.Get
                 },
                 section: {
                     id: '1',
@@ -75,7 +75,7 @@ export class Target extends Madara {
             {
                 request: {
                     url: `${this.baseUrl}/${this.directoryPath}/?m_orderby=views`,
-                    method: 'GET'
+                    method: HttpMethod.Get
                 },
                 section: {
                     id: '2',
@@ -87,7 +87,7 @@ export class Target extends Madara {
             {
                 request: {
                     url: `${this.baseUrl}/${this.directoryPath}/?m_orderby=new-manga`,
-                    method: 'GET'
+                    method: HttpMethod.Get
                 },
                 section: {
                     id: '3',
@@ -104,7 +104,7 @@ export class Target extends Madara {
             promises.push(
                 this.client.request(section.request).then(async response => {
                     this.checkResponseError(response)
-                    const $ = load(response.data as string)
+                    const $ = load(await response.text())
                     section.section.items = await this.parser.parseHomeSection($, this)
                     return section.section
                 })
@@ -143,12 +143,12 @@ export class Target extends Madara {
 
         const request = {
             url: `${this.baseUrl}/${this.directoryPath}/page/${page}/?${param}`,
-            method: 'GET'
+            method: HttpMethod.Get
         }
 
         const response = await this.client.request(request)
         this.checkResponseError(response)
-        const $ = load(response.data as string)
+        const $ = load(await response.text())
         const items: Highlight[] = await this.parser.parseHomeSection($, this)
 
         return {

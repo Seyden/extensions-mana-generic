@@ -1,5 +1,5 @@
 import {
-    NetworkClientBuilder
+    HttpClient,
 } from '@mana-app/types'
 import {
     AtsumaruBrowseResponse,
@@ -66,15 +66,14 @@ function absoluteAtsumaruUrl(value: string): string {
 }
 
 export class AtsumaruApi {
-    private readonly client: NetworkClient
+    private readonly client: HttpClient
 
-    constructor(client?: NetworkClient) {
-        this.client = client ?? new NetworkClientBuilder()
-            .setRateLimit(10, 1)
-            .setTimeout(20_000)
+    constructor(client?: HttpClient) {
+        this.client = client ?? new HttpClient()
+            .setRateLimit(10, 1_000)
+            .setTimeoutMs(20_000)
             .addHeader('Accept', 'application/json')
             .addHeader('Referer', `${ATSUMARU_BASE_URL}/`)
-            .build()
     }
 
     getFilters(): Promise<AtsumaruFilterData> {
@@ -120,7 +119,7 @@ export class AtsumaruApi {
         }
 
         try {
-            const parsed = JSON.parse(response.data) as unknown
+            const parsed = await response.json<unknown>() as unknown
             if (!parsed || typeof parsed !== 'object') {
                 throw new Error('response is not an object')
             }

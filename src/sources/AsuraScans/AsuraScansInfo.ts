@@ -10,7 +10,7 @@ export const ASURASCANS_API_DOMAIN = 'https://api.asurascans.com'
 
 export const SOURCE_INFO: SourceInfo = {
     id: 'AsuraScans',
-    version: "1.0.1",
+    version: "1.0.2",
     name: 'AsuraScans',
     thumbnail: 'AsuraScans.png',
     rating: CatalogRating.MIXED,

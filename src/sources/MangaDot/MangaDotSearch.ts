@@ -19,9 +19,8 @@ import {
     SortOption,
     SourceContext,
     UIListSection,
-    UIMultiPicker,
-    UIPicker,
-    UITagsSection,
+    UIMenuPicker,
+    UIMultiPickerSheet,
     UITextField,
     UIToggle
 } from '@mana-app/types'
@@ -537,7 +536,7 @@ export function createMangaDotPreferenceMenu(
             UIListSection({
                 header: 'Chapter list',
                 children: [
-                    UIPicker({
+                    UIMenuPicker({
                         id: 'chapterMode',
                         title: 'Chapter list mode',
                         value: preferences.chapterMode,
@@ -568,7 +567,7 @@ export function createMangaDotPreferenceMenu(
                 header: 'Browse filters',
                 footer: 'Used on Home and as search defaults until an explicit search filter overrides them.',
                 children: [
-                    UIMultiPicker({
+                    UIMultiPickerSheet({
                         id: 'excludedTypes',
                         title: 'Type blacklist',
                         value: preferences.excludedTypes,
@@ -576,14 +575,14 @@ export function createMangaDotPreferenceMenu(
                         optional: true,
                         async didChange(value) { return storePreference(KEYS.excludedTypes, value, 'browse') }
                     }),
-                    UIPicker({
+                    UIMenuPicker({
                         id: 'browseStatus',
                         title: 'Status filter',
                         value: preferences.browseStatus,
                         options: STATUS_OPTIONS,
                         async didChange(value) { return storePreference(KEYS.browseStatus, value, 'browse') }
                     }),
-                    UIMultiPicker({
+                    UIMultiPickerSheet({
                         id: 'excludedDemographics',
                         title: 'Demographic blacklist',
                         value: preferences.excludedDemographics,
@@ -604,29 +603,29 @@ export function createMangaDotPreferenceMenu(
                     })
                 ]
             }),
-            UITagsSection({
+            UIListSection({
                 header: 'Genre blacklist (non-adult)',
                 footer: 'Used when a search explicitly selects Non-adult only.',
-                field: UIMultiPicker({
+                children: [UIMultiPickerSheet({
                     id: 'excludedGenres',
                     title: 'Genres',
                     value: preferences.excludedGenres,
                     options: genres,
                     optional: true,
                     async didChange(value) { return storePreference(KEYS.excludedGenres, value, 'browse') }
-                })
+                })]
             }),
-            UITagsSection({
+            UIListSection({
                 header: 'Genre blacklist (mixed/adult)',
                 footer: 'Used on Home and for Mixed or Adult-only searches.',
-                field: UIMultiPicker({
+                children: [UIMultiPickerSheet({
                     id: 'excludedAdultGenres',
                     title: 'Genres',
                     value: preferences.excludedAdultGenres,
                     options: genres,
                     optional: true,
                     async didChange(value) { return storePreference(KEYS.excludedAdultGenres, value, 'browse') }
-                })
+                })]
             })
         ]
     }

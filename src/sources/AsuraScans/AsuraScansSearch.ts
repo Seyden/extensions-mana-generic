@@ -1,4 +1,10 @@
-import { PagedSearchResult, SearchForm, SearchRequest, SortOption } from '@mana-app/types'
+import {
+    HttpClient,
+    PagedSearchResult,
+    SearchForm,
+    SearchRequest,
+    SortOption,
+} from '@mana-app/types'
 import { FilterProps, GenresResponse, orderOptions } from './AsuraScansInterfaces'
 import { loadJsonData } from './AsuraScansHelper'
 import { ASURASCANS_API_DOMAIN } from './AsuraScansInfo'
@@ -15,7 +21,7 @@ export async function getSortOptions(): Promise<SortOption[]> {
     }))
 }
 
-export async function getSearchForm(client: NetworkClient, parser: AsuraScansParser): Promise<SearchForm> {
+export async function getSearchForm(client: HttpClient, parser: AsuraScansParser): Promise<SearchForm> {
     const { data: genres } = await loadJsonData<GenresResponse>(client, `${ASURASCANS_API_DOMAIN}/api/genres`)
     return parser.parseTags(genres ?? [])
 }

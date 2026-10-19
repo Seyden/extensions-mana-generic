@@ -1,6 +1,6 @@
 import {
-    NetworkClientBuilder,
-    NetworkRequest
+    CloudflareError,
+    HttpClient,
 } from '@mana-app/types'
 import {
     MANGADOT_DOMAIN,
@@ -24,15 +24,14 @@ function parseJson<T>(data: string, context: string): T {
 }
 
 export class MangaDotApi {
-    private readonly client: NetworkClient
+    private readonly client: HttpClient
 
-    constructor(client?: NetworkClient) {
-        this.client = client ?? new NetworkClientBuilder()
-            .setTimeout(30_000)
+    constructor(client?: HttpClient) {
+        this.client = client ?? new HttpClient()
+            .setTimeoutMs(30_000)
             .addHeader('Accept', 'application/json')
             .addHeader('Referer', `${MANGADOT_DOMAIN}/`)
             .addHeader('Origin', MANGADOT_DOMAIN)
-            .build()
     }
 
     async getSection(section: string, page: number, limit: number): Promise<MangaDotPagedResponse> {
@@ -173,16 +172,7 @@ export class MangaDotApi {
     }
 
     private async getAbsoluteJson<T>(url: string, context: string): Promise<T> {
-        const request: NetworkRequest = {
-            url,
-            method: 'GET',
-            validateStatus: (status) =>
-                (status >= 200 && status < 300) ||
-                status === 403 ||
-                status === 404 ||
-                status === 503
-        }
-        const response = await this.client.request(request)
+        const response = await this.client.get(url)
 
         if (response.status === 403 || response.status === 503) {
             throw new CloudflareError(url)
@@ -194,6 +184,6 @@ export class MangaDotApi {
             throw new Error(`MangaDot request failed (${response.status}) for ${context}`)
         }
 
-        return parseJson<T>(response.data, context)
+        return parseJson<T>(await response.text(), context)
     }
 }

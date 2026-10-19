@@ -1,4 +1,7 @@
-import { SearchRequest } from '@mana-app/types'
+import {
+    HttpClient,
+    SearchRequest,
+} from '@mana-app/types'
 import { ASURASCANS_API_DOMAIN } from './AsuraScansInfo'
 import { loadJsonData } from './AsuraScansHelper'
 import { ApiCollection, FilterProps, SeriesSearchItem, TrendingItem, TrendingPeriod } from './AsuraScansInterfaces'
@@ -28,7 +31,7 @@ export function constructSearchUrl(offset: number, request: SearchRequest<Filter
 }
 
 export class AsuraScansApi {
-    constructor(private readonly client: NetworkClient) {}
+    constructor(private readonly client: HttpClient) {}
 
     getSeriesPage(request: SearchRequest<FilterProps>): Promise<ApiCollection<SeriesSearchItem>> {
         return this.getCollection(constructSearchUrl(((request.page ?? 1) - 1) * SERIES_PAGE_LIMIT, request))

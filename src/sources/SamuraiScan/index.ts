@@ -3,9 +3,8 @@ import {
     CatalogRating,
     PageLink,
     PageSection,
-    SectionStyle
+    SectionStyle,
 } from '@mana-app/types'
-
 import {
     getExportVersion,
     Madara
@@ -79,7 +78,7 @@ export class Target extends Madara {
             promises.push(
                 this.client.request(section.request).then(async response => {
                     this.checkResponseError(response)
-                    const $ = load(response.data as string)
+                    const $ = load(await response.text())
                     section.section.items = await this.parser.parseHomeSection($, this)
                     return section.section
                 })

@@ -1,6 +1,8 @@
+import {
+    SourceInfo,
+    CatalogRating,
+} from '@mana-app/types'
 /* eslint-disable linebreak-style */
-import { SourceInfo, CatalogRating } from "@mana-app/types";
-
 import {
     getExportVersion,
     MangaStream
@@ -15,7 +17,7 @@ export class Target extends MangaStream {
         version: getExportVersion('0.0.0'),
         name: 'eDoujin',
         thumbnail: 'eDoujin.png',
-        rating: CatalogRating.NSFW,
+        rating: CatalogRating.EXPLICIT,
         website: EDOUJIN_DOMAIN,
     }
 

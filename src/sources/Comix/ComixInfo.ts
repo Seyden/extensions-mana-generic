@@ -5,7 +5,7 @@ export const COMIX_LANGUAGE = 'en_US'
 
 export const COMIX_SOURCE_INFO: SourceInfo = {
     id: 'Comix',
-    version: '1.0.1',
+    version: '1.0.2',
     name: 'Comix',
     description: 'Read manga, manhwa, manhua, and comics from Comix.',
     thumbnail: 'Comix.png',

@@ -61,7 +61,7 @@ export class Target implements
     SourcePreferenceProvider {
     readonly info: SourceInfo = {
         id: 'MangaDot',
-        version: '1.0.1',
+        version: '1.0.2',
         name: 'MangaDot',
         description: 'Read manga, manhwa, and manhua from MangaDot.',
         thumbnail: 'MangaDot.png',

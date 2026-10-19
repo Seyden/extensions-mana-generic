@@ -41,7 +41,7 @@ import {
 } from './IkenInterfaces'
 import { IkenParser } from './IkenParser'
 
-const BASE_VERSION = '1.0.0'
+const BASE_VERSION = '1.0.1'
 
 export function getExportVersion(extensionVersion: string): string {
     return BASE_VERSION

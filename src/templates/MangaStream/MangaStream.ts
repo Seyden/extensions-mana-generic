@@ -51,7 +51,7 @@ import { UITextField } from '@mana-app/types/dist/types/UI/UIElementBuilders'
 const simpleUrl = require('simple-url')
 
 // Set the version for the base, changing this version will change the versions of all sources
-const BASE_VERSION = "1.0.0"
+const BASE_VERSION = "1.0.1"
 export const getExportVersion = (EXTENSION_VERSION: string): string => {
     return BASE_VERSION.split('.').map((x, index) => Number(x) + Number(EXTENSION_VERSION.split('.')[index])).join('.')
 }
